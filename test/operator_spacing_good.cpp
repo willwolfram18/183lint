@@ -39,6 +39,12 @@ int main() {
     -x;
     +x;
 
+    // Multiple operators on one line
+    x + 1 - 1;
+    x + -1;
+    x += x - 1;
+    x && true == x || false;
+
     cout << "hello world" << endl << x;
     cin >> x >> x;
 
