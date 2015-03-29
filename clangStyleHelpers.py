@@ -15,6 +15,12 @@ def _findOperators(self, cursor, operatorCursors):
         for c in cursor.get_children():
             self._findOperators(c, operatorCursors)
 
+def _operatorSpacingCheckHelper(self, code, line, index, isCompound):
+    if not isSpacedCorrectly(code, index, isCompound):
+        spacingData = {
+            'operator': code[index:index + 2] if isCompound else code[index:index + 1]
+        }
+        self._addError('OPERATOR_SPACING', line + 1, index + 1, spacingData)
 
 '''
 General helper functions
@@ -58,10 +64,3 @@ def isSpacedCorrectly(code, index, isCompound):
     elif index + postOffset < len(code) and code[index + postOffset] not in [' ', '\n', '\r']:
         return False
     return  True
-
-def _operatorSpacingCheckHelper(self, code, line, index, isCompound):
-    if not isSpacedCorrectly(code, index, isCompound):
-        spacingData = {
-            'operator': code[index:index + 2] if isCompound else code[index:index + 1]
-        }
-        self._addError('OPERATOR_SPACING', line + 1, index + 1, spacingData)

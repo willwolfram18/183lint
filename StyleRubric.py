@@ -1,4 +1,5 @@
 from clang.cindex import Config, CursorKind, Index, TranslationUnitLoadError
+import clangStyleFunctions
 import codecs
 from cpplint import CleansedLines, RemoveMultiLineComments
 from StyleError import StyleError
@@ -10,7 +11,6 @@ _CLANG_LIB_LOCATION = '/usr/local/Cellar/llvm/3.5.1/lib'
 class StyleRubric(object):
     # Import helper functions
     from clangStyleHelpers import _cursorNotInFile, _findOperators, _operatorSpacingCheckHelper
-    from clangStyleFunctions import evaluateOperatorSpacing
 
     def __init__(self):
         Config.set_library_path(_CLANG_LIB_LOCATION)
@@ -29,9 +29,8 @@ class StyleRubric(object):
         self._cleanLines = None
         pass
 
-    # TODO: Take code from old rubric to load functions from modules
     def _loadFunctions(self):
-        return
+        return clangStyleFunctions.__dir__()
 
     def _safelyOpenFile(self):
         try:
@@ -49,7 +48,7 @@ class StyleRubric(object):
         self._currentFilename = None
         self._cleanLines = None
 
-    def _addError(self, label, line, column, data):
+    def _addError(self, label, line, column, data={}):
         self._totalErrors += 1
         if label not in self._errorTypes:
             self._errorTypes[label] = 0
@@ -78,4 +77,5 @@ class StyleRubric(object):
         RemoveMultiLineComments(filename, data, '')
         self._cleanLines = CleansedLines(data)
         # Grade the file
-        self.evaluateOperatorSpacing()
+        for func in self._styleFunctions:
+            func(self, self._clangCursor)

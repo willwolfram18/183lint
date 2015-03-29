@@ -1,7 +1,10 @@
 from clang.cindex import CursorKind
-from clangStyleHelpers import findOperatorStart, isSpacedCorrectly, isCompoundBinaryOperator
+from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator
 
-def evaluateOperatorSpacing(self):
+def __dir__():
+    return [evaluateOperatorSpacing, evaluateTernaryOperator]
+
+def evaluateOperatorSpacing(self, cursor):
     # Find all of the operators
     cursors = []
     self._findOperators(self._clangCursor, cursors)
@@ -47,3 +50,10 @@ def evaluateOperatorSpacing(self):
         else: # operator>> and operator<<
             self._operatorSpacingCheckHelper(code, lineNumber, index, True)
 
+def evaluateTernaryOperator(self, cursor):
+    if self._cursorNotInFile(cursor):
+        return
+    if cursor.kind == CursorKind.CONDITIONAL_OPERATOR:
+        self._addError('TERNARY_OPERATOR', cursor.location.line, cursor.location.column)
+    for c in cursor.get_children():
+        evaluateTernaryOperator(self, c)

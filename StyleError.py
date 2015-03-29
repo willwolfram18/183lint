@@ -45,7 +45,7 @@ class StyleError(object):
             'UNARY_OPERATOR_SPACING': 'Incorrect spacing around the unary {} operator.'.format(self.data.get('operator')),
             'OPERATOR_SPACING': 'Incorrect spacing around {} operator.'.format(self.data.get('operator')),
             'GOTO': 'Do not use goto',
-            'TERNARY_OPERATOR': 'We advise against the ternary operator',
+            'TERNARY_OPERATOR': 'EECS 183 advises against the use of the ternary operator (e.g. int x = foo() ? 1 : 2).',
             'LINE_LENGTH': 'Your file exceeds 90 characters per line',
             'COMPARISON_TO_BOOL': 'Do not do compare to values with a bool literal',
             'INFINITE_LOOP': 'Please do not use while(true) and while(!false)',
