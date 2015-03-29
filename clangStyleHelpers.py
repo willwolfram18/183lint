@@ -22,6 +22,28 @@ def _operatorSpacingCheckHelper(self, code, line, index, isCompound):
         }
         self._addError('OPERATOR_SPACING', line + 1, index + 1, spacingData)
 
+def _evaluateBreakStatementsHelper(self, cursor, scopeStack):
+    if self._cursorNotInFile(cursor):
+        return
+
+    addedScope = False
+    if cursor.kind == CursorKind.SWITCH_STMT:
+        scopeStack.append('SWITCH')
+        addedScope = True
+    elif cursor.kind == CursorKind.FOR_STMT or \
+        cursor.kind == CursorKind.WHILE_STMT or \
+        cursor.kind == CursorKind.DO_STMT:
+        scopeStack.append('LOOP')
+        addedScope = True
+    elif cursor.kind == CursorKind.BREAK_STMT:
+        if len(scopeStack) == 0 or scopeStack[-1] != 'SWITCH':
+            self._addError('UNNECESSARY_BREAK', cursor.location.line, cursor.location.column)
+
+    for c in cursor.get_children():
+        _evaluateBreakStatementsHelper(self, c, scopeStack)
+    if addedScope:
+        scopeStack.pop()
+
 '''
 General helper functions
 '''

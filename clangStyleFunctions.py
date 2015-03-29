@@ -1,8 +1,9 @@
 from clang.cindex import CursorKind
-from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator
+from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
+        _evaluateBreakStatementsHelper
 
 def __dir__():
-    return [evaluateOperatorSpacing, evaluateTernaryOperator]
+    return [evaluateOperatorSpacing, evaluateTernaryOperator, evalueBreakStatements]
 
 def evaluateOperatorSpacing(self, cursor):
     # Find all of the operators
@@ -57,3 +58,7 @@ def evaluateTernaryOperator(self, cursor):
         self._addError('TERNARY_OPERATOR', cursor.location.line, cursor.location.column)
     for c in cursor.get_children():
         evaluateTernaryOperator(self, c)
+
+def evalueBreakStatements(self, cursor):
+    scopeStack = []
+    _evaluateBreakStatementsHelper(self, cursor, scopeStack)

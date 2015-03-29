@@ -49,7 +49,7 @@ class StyleError(object):
             'LINE_LENGTH': 'Your file exceeds 90 characters per line',
             'COMPARISON_TO_BOOL': 'Do not do compare to values with a bool literal',
             'INFINITE_LOOP': 'Please do not use while(true) and while(!false)',
-            'UNNECESSARY_BREAK': 'You should not use a break statement inside of a loop',
+            'UNNECESSARY_BREAK': 'EECS 183 does not allow the use of break inside of any loop.',
             'EXIT': 'Do not use exit()',
             'CONTINUE': 'Do not use continue',
             'BANNED_INCLUDE': 'You are not allowed to use that library',

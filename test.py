@@ -1,7 +1,7 @@
 from StyleRubric import StyleRubric
 
 s = StyleRubric()
-s.gradeFile('test/ternary_bad.cpp')
+s.gradeFile('test/break_bad.cpp')
 for filename, errors in s._fileErrors.iteritems():
     if len(errors) == 0:
         print 'No errors found :D'
