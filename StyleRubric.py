@@ -48,7 +48,6 @@ class StyleRubric(object):
         self._clangCursor = None
         self._currentFilename = None
         self._cleanLines = None
-        self._fileErrors[self._currentFilename] = []
 
     def _addError(self, label, line, column, data):
         self._totalErrors += 1
@@ -64,6 +63,7 @@ class StyleRubric(object):
         assert self._cleanLines == None
 
         self._currentFilename = filename
+        self._fileErrors[self._currentFilename] = []
         # parse will handle checking for appropriate file extensions
         try:
             self._clangCursor = self._clangIndex.parse(self._currentFilename).cursor
@@ -71,9 +71,11 @@ class StyleRubric(object):
             print 'Clang was unable to parse {}.'.format(filename)
             return
 
-        self._cleanLines = self._safelyOpenFile()
-        if self._cleanLines == None:
+        data = self._safelyOpenFile()
+        if data == None:
             return
 
+        RemoveMultiLineComments(filename, data, '')
+        self._cleanLines = CleansedLines(data)
         # Grade the file
         self.evaluateOperatorSpacing()

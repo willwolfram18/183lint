@@ -40,10 +40,10 @@ def evaluateOperatorSpacing(self):
                 # Check for white space or ( in front, and no whitespace behind it
                 if (index - 1 >= 0 and code[index - 1] not in [' ', '\n', '\r', '(']) or \
                     (index + 1 < len(code) and code[index + 1] in [' ', '\n', '\r']):
-                    spacindData = {
+                    spacingData = {
                         'operator': code[index:index + 1],
                     }
-                    self._addError('UNARY_OPERATOR_SPACING', lineNumber + 1, index + 1, )
+                    self._addError('UNARY_OPERATOR_SPACING', lineNumber + 1, index + 1, spacingData)
         else: # operator>> and operator<<
             self._operatorSpacingCheckHelper(code, lineNumber, index, True)
 
