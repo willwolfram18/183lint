@@ -1,6 +1,7 @@
 from clang.cindex import Config, CursorKind, Index, TranslationUnitLoadError
 import codecs
 from cpplint import CleansedLines, RemoveMultiLineComments
+from StyleError import StyleError
 import sys
 
 _CLANG_LIB_LOCATION = '/usr/local/Cellar/llvm/3.5.1/lib'
@@ -17,12 +18,18 @@ class StyleRubric(object):
         self._clangIndex = Index.create()
         self._styleFunctions = self._loadFunctions()
 
+        # Tracking for all files
+        self._fileErrors = {}
+        self._errorTypes = {}
+        self._totalErrors = 0
+
         # Objects to maintain state of current file
         self._clangCursor = None
         self._currentFilename = None
         self._cleanLines = None
         pass
 
+    # TODO: Take code from old rubric to load functions from modules
     def _loadFunctions(self):
         return
 
@@ -41,6 +48,14 @@ class StyleRubric(object):
         self._clangCursor = None
         self._currentFilename = None
         self._cleanLines = None
+        self._fileErrors[self._currentFilename] = []
+
+    def _addError(self, label, line, column, data):
+        self._totalErrors += 1
+        if label not in self._errorTypes:
+            self._errorTypes[label] = 0
+        self._errorTypes[label] += 1
+        self._fileErrors[self._currentFilename].append(StyleError(line, column, 0, label, data))
 
     def gradeFile(self, filename):
         self._resetForNextFile()
