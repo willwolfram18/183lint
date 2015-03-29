@@ -42,7 +42,8 @@ class StyleError(object):
 
     def _setMessage(self):
         messages = {
-            'OPERATOR_SPACING': 'Invalid operator spacing',
+            'UNARY_OPERATOR_SPACING': 'Incorrect spacing around the unary {} operator.'.format(self.data.get('operator')),
+            'OPERATOR_SPACING': 'Incorrect spacing around {} operator.'.format(self.data.get('operator')),
             'GOTO': 'Do not use goto',
             'TERNARY_OPERATOR': 'We advise against the ternary operator',
             'LINE_LENGTH': 'Your file exceeds 90 characters per line',

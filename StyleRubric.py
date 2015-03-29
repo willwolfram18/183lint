@@ -9,7 +9,7 @@ _CLANG_LIB_LOCATION = '/usr/local/Cellar/llvm/3.5.1/lib'
 
 class StyleRubric(object):
     # Import helper functions
-    from clangStyleHelpers import _cursorNotInFile, _findOperators
+    from clangStyleHelpers import _cursorNotInFile, _findOperators, _operatorSpacingCheckHelper
     from clangStyleFunctions import evaluateOperatorSpacing
 
     def __init__(self):

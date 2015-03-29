@@ -55,7 +55,7 @@ def evaluate_spacing(operator_cursors, clean_lines):
         code = clean_lines.lines[c.location.line - 1]
         if c.location.line not in lineNextStart:
             lineNextStart[c.location.line] = c.location.column - 1
-        index = find_operator_start(code, lineNextStart[c.location.line])
+        index = find_operator_start(code, max(lineNextStart[c.location.line], c.location.column - 1))
         lineNextStart[c.location.line] = index + 1
         # print 'Line: {} Index location: {} String slice: {}'.format(code[:-1], index,code[index:-1])
         if c.kind == CursorKind.COMPOUND_ASSIGNMENT_OPERATOR:
