@@ -3,19 +3,20 @@ from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
         _evaluateBreakStatementsHelper
 
 def __dir__():
-    return [evaluateOperatorSpacing, evaluateTernaryOperator, evalueBreakStatements]
+    return [evaluateOperatorSpacing, evaluateTernaryOperator, evalueBreakStatements,
+            evaluateContinueStatements]
 
-def evaluateOperatorSpacing(self, cursor):
+def evaluateOperatorSpacing(rubric, cursor):
     # Find all of the operators
     cursors = []
-    self._findOperators(self._clangCursor, cursors)
+    rubric._findOperators(rubric._clangCursor, cursors)
 
     # Maintain where we will start next operator search on that line
     nextStartOfLine = {}
     for c in cursors:
         # Clang's line and column numbers are 1-indexed, need -1 for zero index
         lineNumber = c.location.line - 1
-        code = self._cleanLines.lines[lineNumber]
+        code = rubric._cleanLines.lines[lineNumber]
 
         if lineNumber not in nextStartOfLine:
             # Save the next column
@@ -29,13 +30,13 @@ def evaluateOperatorSpacing(self, cursor):
 
         if c.kind == CursorKind.COMPOUND_ASSIGNMENT_OPERATOR:
             nextStartOfLine[lineNumber] += 1 # Operator spans 2 locations, move ahead one more
-            self._operatorSpacingCheckHelper(code, lineNumber, index, True)
+            rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
         elif c.kind == CursorKind.BINARY_OPERATOR:
             if isCompoundBinaryOperator(code, index):
                 nextStartOfLine[lineNumber] += 1 # Operator spans 2 locations, move ahead one more
-                self._operatorSpacingCheckHelper(code, lineNumber, index, True)
+                rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
             else:
-                self._operatorSpacingCheckHelper(code, lineNumber, index, False)
+                rubric._operatorSpacingCheckHelper(code, lineNumber, index, False)
         elif c.kind == CursorKind.UNARY_OPERATOR:
             if index + 1 < len(code) and code[index] == code[index + 1]:
                 # No rules for the ++ and -- operators, just skip it
@@ -47,18 +48,26 @@ def evaluateOperatorSpacing(self, cursor):
                     spacingData = {
                         'operator': code[index:index + 1],
                     }
-                    self._addError('UNARY_OPERATOR_SPACING', lineNumber + 1, index + 1, spacingData)
+                    rubric._addError('UNARY_OPERATOR_SPACING', lineNumber + 1, index + 1, spacingData)
         else: # operator>> and operator<<
-            self._operatorSpacingCheckHelper(code, lineNumber, index, True)
+            rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
 
-def evaluateTernaryOperator(self, cursor):
-    if self._cursorNotInFile(cursor):
+def evaluateTernaryOperator(rubric, cursor):
+    if rubric._cursorNotInFile(cursor):
         return
     if cursor.kind == CursorKind.CONDITIONAL_OPERATOR:
-        self._addError('TERNARY_OPERATOR', cursor.location.line, cursor.location.column)
+        rubric._addError('TERNARY_OPERATOR', cursor.location.line, cursor.location.column)
     for c in cursor.get_children():
-        evaluateTernaryOperator(self, c)
+        evaluateTernaryOperator(rubric, c)
 
-def evalueBreakStatements(self, cursor):
+def evalueBreakStatements(rubric, cursor):
     scopeStack = []
-    _evaluateBreakStatementsHelper(self, cursor, scopeStack)
+    _evaluateBreakStatementsHelper(rubric, cursor, scopeStack)
+
+def evaluateContinueStatements(rubric, cursor):
+    if rubric._cursorNotInFile(cursor):
+        return
+    if cursor.kind == CursorKind.CONTINUE_STMT:
+        rubric._addError('CONTINUE', cursor.location.line, cursor.location.column)
+    for c in cursor.get_children():
+        evaluateContinueStatements(rubric, c)

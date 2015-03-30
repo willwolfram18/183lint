@@ -3,27 +3,27 @@ from clang.cindex import CursorKind
 '''
 Helper functions for the StyleRubric class
 '''
-def _cursorNotInFile(self, cursor):
+def _cursorNotInFile(rubric, cursor):
         return cursor.location.file and \
-               cursor.location.file.name != self._currentFilename
+               cursor.location.file.name != rubric._currentFilename
 
-def _findOperators(self, cursor, operatorCursors):
-        if self._cursorNotInFile(cursor):
+def _findOperators(rubric, cursor, operatorCursors):
+        if rubric._cursorNotInFile(cursor):
             return
         if isOperator(cursor):
             operatorCursors.append(cursor)
         for c in cursor.get_children():
-            self._findOperators(c, operatorCursors)
+            rubric._findOperators(c, operatorCursors)
 
-def _operatorSpacingCheckHelper(self, code, line, index, isCompound):
+def _operatorSpacingCheckHelper(rubric, code, line, index, isCompound):
     if not isSpacedCorrectly(code, index, isCompound):
         spacingData = {
             'operator': code[index:index + 2] if isCompound else code[index:index + 1]
         }
-        self._addError('OPERATOR_SPACING', line + 1, index + 1, spacingData)
+        rubric._addError('OPERATOR_SPACING', line + 1, index + 1, spacingData)
 
-def _evaluateBreakStatementsHelper(self, cursor, scopeStack):
-    if self._cursorNotInFile(cursor):
+def _evaluateBreakStatementsHelper(rubric, cursor, scopeStack):
+    if rubric._cursorNotInFile(cursor):
         return
 
     addedScope = False
@@ -37,10 +37,10 @@ def _evaluateBreakStatementsHelper(self, cursor, scopeStack):
         addedScope = True
     elif cursor.kind == CursorKind.BREAK_STMT:
         if len(scopeStack) == 0 or scopeStack[-1] != 'SWITCH':
-            self._addError('UNNECESSARY_BREAK', cursor.location.line, cursor.location.column)
+            rubric._addError('UNNECESSARY_BREAK', cursor.location.line, cursor.location.column)
 
     for c in cursor.get_children():
-        _evaluateBreakStatementsHelper(self, c, scopeStack)
+        _evaluateBreakStatementsHelper(rubric, c, scopeStack)
     if addedScope:
         scopeStack.pop()
 

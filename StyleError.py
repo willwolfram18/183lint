@@ -49,7 +49,7 @@ class StyleError(object):
             'LINE_LENGTH': 'Your file exceeds 90 characters per line',
             'COMPARISON_TO_BOOL': 'Do not do compare to values with a bool literal',
             'INFINITE_LOOP': 'Please do not use while(true) and while(!false)',
-            'UNNECESSARY_BREAK': 'EECS 183 does not allow the use of break inside of any loop.',
+            'UNNECESSARY_BREAK': 'EECS 183 prohibits the use of break inside of any loop.',
             'EXIT': 'Do not use exit()',
             'CONTINUE': 'Do not use continue',
             'BANNED_INCLUDE': 'You are not allowed to use that library',
@@ -57,7 +57,7 @@ class StyleError(object):
         if self.label in messages:
             self.message = messages[self.label]
         else:
-            self.message = 'The label "{}" is not a supported label'.format(self.label)
+            self.message = '"{}" is not a supported label'.format(self.label)
 
     # def getErrorMessage(self, label):
     #     return {
