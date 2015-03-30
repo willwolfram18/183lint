@@ -2,7 +2,7 @@ from StyleRubric import StyleRubric
 
 s = StyleRubric()
 for filename in ['break_bad.cpp', 'operator_spacing_good.cpp', 'operator_spacing_bad.cpp',
-                 'continue_good.cpp', 'continue_bad.cpp']:
+                 'continue_good.cpp', 'continue_bad.cpp', 'goto_good.cpp', 'goto_bad.cpp']:
     filename = 'test/' + filename
     s.gradeFile(filename)
 

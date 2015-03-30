@@ -4,7 +4,7 @@ from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
 
 def __dir__():
     return [evaluateOperatorSpacing, evaluateTernaryOperator, evalueBreakStatements,
-            evaluateContinueStatements]
+            evaluateContinueStatements, evaluateGotoStatments]
 
 def evaluateOperatorSpacing(rubric, cursor):
     # Find all of the operators
@@ -71,3 +71,11 @@ def evaluateContinueStatements(rubric, cursor):
         rubric._addError('CONTINUE', cursor.location.line, cursor.location.column)
     for c in cursor.get_children():
         evaluateContinueStatements(rubric, c)
+
+def evaluateGotoStatments(rubric, cursor):
+    if rubric._cursorNotInFile(cursor):
+        return
+    if cursor.kind == CursorKind.GOTO_STMT:
+        rubric._addError('GOTO', cursor.location.line, cursor.location.column)
+    for c in cursor.get_children():
+        evaluateGotoStatments(rubric, c)
