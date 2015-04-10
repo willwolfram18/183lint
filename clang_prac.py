@@ -49,6 +49,7 @@ def is_compound_binary(code, column):
     # return False
     return code[column:column + 2] in ['!=', '==', '<=', '>=', '&&', '||']
 
+# DONE
 def evaluate_spacing(operator_cursors, clean_lines):
     lineNextStart = {}
     for c in operator_cursors:
@@ -101,7 +102,7 @@ def is_spaced_correctly(code, column, is_compound):
             return False
     return True
 
-
+# DONE
 def find_breaks(node, file_name, scope_stack):
     if node.location.file and node.location.file.name != file_name:
         return
@@ -124,6 +125,7 @@ def find_breaks(node, file_name, scope_stack):
     if addedScope:
         scope_stack.pop()
 
+# DONE
 def find_ternary(node, file_name):
     if node.location.file and node.location.file.name != file_name:
         return
@@ -133,6 +135,7 @@ def find_ternary(node, file_name):
     for n in node.get_children():
         find_ternary(n, file_name)
 
+# DONE
 def find_continues(node, file_name):
     if node.location.file and node.location.file.name != file_name:
         return
@@ -142,6 +145,7 @@ def find_continues(node, file_name):
     for n in node.get_children():
         find_continues(n, file_name)
 
+# DONE
 def find_gotos(node, file_name):
     if node.location.file and node.location.file.name != file_name:
         return
@@ -159,6 +163,7 @@ def find_exit(node, file_name):
     for n in node.get_children():
         find_exit(n, file_name)
 
+# DONE
 def find_loop_children(node, file_name):
     '''
     TODO: WHILE_STMT child ordering: Conditional + Body
@@ -189,6 +194,7 @@ def find_loop_children(node, file_name):
     for n in node.get_children():
         find_loop_children(n, file_name)
 
+
 def find_bool_literal_comp(node, file_name, clean_lines):
     if node.location.file and node.location.file.name != file_name:
         return
@@ -212,7 +218,7 @@ full_suite = ['good.cpp', 'num_of_commands.cpp', 'test_valid_return.cpp', 'opera
                 'ternary_bad.cpp', 'while_true_good.cpp', 'while_true_bad.cpp', 'logical_AND_OR_spacing_bad.cpp',
                 'logical_AND_OR_spacing_good.cpp', ]
 
-individ_suite = ['operator_spacing_bad.cpp', 'operator_spacing_good.cpp']
+individ_suite = ['while_true_bad.cpp']
 
 def find_var_declaration(cursor, filename):
     if cursor.location.file and cursor.location.file.name != filename:

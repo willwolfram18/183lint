@@ -3,8 +3,8 @@ from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
         _evaluateBreakStatementsHelper
 
 def __dir__():
-    return [evaluateOperatorSpacing, evaluateTernaryOperator, evalueBreakStatements,
-            evaluateContinueStatements, evaluateGotoStatments]
+    return [evaluateOperatorSpacing, evaluateTernaryOperator, evaluateBreakStatements,
+            evaluateContinueStatements, evaluateGotoStatments, evaluateWhileTrue]
 
 def evaluateOperatorSpacing(rubric, cursor):
     # Find all of the operators
@@ -60,7 +60,7 @@ def evaluateTernaryOperator(rubric, cursor):
     for c in cursor.get_children():
         evaluateTernaryOperator(rubric, c)
 
-def evalueBreakStatements(rubric, cursor):
+def evaluateBreakStatements(rubric, cursor):
     scopeStack = []
     _evaluateBreakStatementsHelper(rubric, cursor, scopeStack)
 
@@ -79,3 +79,27 @@ def evaluateGotoStatments(rubric, cursor):
         rubric._addError('GOTO', cursor.location.line, cursor.location.column)
     for c in cursor.get_children():
         evaluateGotoStatments(rubric, c)
+
+def evaluateWhileTrue(rubric, cursor):
+    if rubric._cursorNotInFile(cursor):
+        return
+    if cursor.kind == CursorKind.DO_STMT or cursor.kind == CursorKind.WHILE_STMT:
+        loopConditionCursor = None
+        if cursor.kind == CursorKind.DO_STMT:
+            loopConditionCursor = [x for x in cursor.get_children()][1]
+        else:
+            loopConditionCursor = [x for x in cursor.get_children()][0]
+        assert loopConditionCursor
+
+        if loopConditionCursor.kind == CursorKind.CXX_BOOL_LITERAL_EXPR:
+            rubric._addError('INFINITE_LOOP', loopConditionCursor.location.line, loopConditionCursor.location.column)
+        elif loopConditionCursor.kind == CursorKind.UNARY_OPERATOR:
+            # Found unary NOT operator, check if its first child is a literal bool
+            child = [x for x in loopConditionCursor.get_children()][0]
+            if child.kind == CursorKind.CXX_BOOL_LITERAL_EXPR:
+                rubric._addError('INFINITE_LOOP', loopConditionCursor.location.line, loopConditionCursor.location.column)
+    for c in cursor.get_children():
+        evaluateWhileTrue(rubric, c)
+
+def evaluateBoolLiteralComparison(rubric, cursor):
+    pass
