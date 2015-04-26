@@ -47,7 +47,7 @@ class StyleError(object):
             'GOTO': 'EECS 183 prohibits the use of goto statements.',
             'TERNARY_OPERATOR': 'EECS 183 advises against the use of the ternary operator (e.g. int x = foo() ? 1 : 2).',
             'LINE_LENGTH': 'Line exceeds 90 characters.',
-            'COMPARISON_TO_BOOL': 'Do not do compare to values with a bool literal',
+            'COMPARISON_TO_BOOL': 'Do not do make comparisons with bool literals, such as == true.',
             'INFINITE_LOOP': 'Please do not use infinite loops such as while(true) or while(!false).',
             'UNNECESSARY_BREAK': 'EECS 183 prohibits the use of break inside of any loop.',
             'EXIT': 'Do not use exit()',

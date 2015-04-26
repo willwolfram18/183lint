@@ -4,7 +4,8 @@ from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
 
 def __dir__():
     return [evaluateOperatorSpacing, evaluateTernaryOperator, evaluateBreakStatements,
-            evaluateContinueStatements, evaluateGotoStatments, evaluateWhileTrue]
+            evaluateContinueStatements, evaluateGotoStatments, evaluateWhileTrue,
+            evaluateBoolLiteralComparison]
 
 def evaluateOperatorSpacing(rubric, cursor):
     # Find all of the operators
@@ -102,4 +103,22 @@ def evaluateWhileTrue(rubric, cursor):
         evaluateWhileTrue(rubric, c)
 
 def evaluateBoolLiteralComparison(rubric, cursor):
-    pass
+    if rubric._cursorNotInFile(cursor):
+        return
+    if cursor.kind == CursorKind.BINARY_OPERATOR:
+        # cursor lines are 1 indexed, need -1 for correct array offset
+        code = rubric._cleanLines.lines[cursor.location.line - 1]
+        index = findOperatorStart(code, cursor.location.column)
+        if code[index:index+2] in ['==', '!=']:
+            # Evaluate the children of the operator
+            for child in cursor.get_children():
+                if child.kind == CursorKind.UNEXPOSED_EXPR:
+                    # AST does implicit cast (unexposed expression in Python) before
+                    # listing bool literal, therefore grab immediate child
+                    operand = [x for x in child.get_children()][0]
+                    if operand.kind == CursorKind.CXX_BOOL_LITERAL_EXPR:
+                        rubric._addError("COMPARISON_TO_BOOL", cursor.location.line, cursor.location.column)
+
+    for c in cursor.get_children():
+        evaluateBoolLiteralComparison(rubric, c)
+
