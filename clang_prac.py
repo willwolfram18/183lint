@@ -218,15 +218,15 @@ full_suite = ['good.cpp', 'num_of_commands.cpp', 'test_valid_return.cpp', 'opera
                 'ternary_bad.cpp', 'while_true_good.cpp', 'while_true_bad.cpp', 'logical_AND_OR_spacing_bad.cpp',
                 'logical_AND_OR_spacing_good.cpp', ]
 
-individ_suite = ['while_true_bad.cpp']
+individ_suite = ['indentation.cpp']
 
-def find_var_declaration(cursor, filename):
+def find_if_stmts(cursor, filename):
     if cursor.location.file and cursor.location.file.name != filename:
         return
-    if cursor.kind == CursorKind.VAR_DECL:
+    if cursor.kind == CursorKind.IF_STMT:
         print 'stop'
     for n in cursor.get_children():
-        find_var_declaration(n, filename)
+        find_if_stmts(n, filename)
 
 
 
@@ -252,7 +252,7 @@ for file_name in individ_suite:
     find_gotos(tu.cursor, file_name)
     find_loop_children(tu.cursor, file_name)
     find_bool_literal_comp(tu.cursor, file_name, clean_lines)
-    find_var_declaration(tu.cursor, file_name)
+    find_if_stmts(tu.cursor, file_name)
     for i in tu.get_includes():
         include_lib_name = i.location.file.name.split('/')[-1]
         if include_lib_name == 'sstream':

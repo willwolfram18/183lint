@@ -6,6 +6,8 @@ from StyleError import StyleError
 import sys
 
 _CLANG_LIB_LOCATION = '/usr/local/Cellar/llvm/3.5.1/lib'
+_LINE_LENGTH_LIMIT = 90
+_PROHIBITED_LIBRARIES = ['sstream']
 
 
 class StyleRubric(object):
@@ -24,10 +26,13 @@ class StyleRubric(object):
         self._totalErrors = 0
 
         # Objects to maintain state of current file
+        self._translationUnit = None
         self._clangCursor = None
         self._currentFilename = None
         self._cleanLines = None
-        pass
+
+        self._maxLineLength = _LINE_LENGTH_LIMIT
+        self._prohibitedLibs = _PROHIBITED_LIBRARIES
 
     def _loadFunctions(self):
         return clangStyleFunctions.__dir__()
@@ -44,6 +49,7 @@ class StyleRubric(object):
             return None
 
     def _resetForNextFile(self):
+        self._translationUnit = None
         self._clangCursor = None
         self._currentFilename = None
         self._cleanLines = None
@@ -57,6 +63,7 @@ class StyleRubric(object):
 
     def gradeFile(self, filename):
         self._resetForNextFile()
+        assert self._translationUnit == None
         assert self._clangCursor == None
         assert self._currentFilename == None
         assert self._cleanLines == None
@@ -65,7 +72,8 @@ class StyleRubric(object):
         self._fileErrors[self._currentFilename] = []
         # parse will handle checking for appropriate file extensions
         try:
-            self._clangCursor = self._clangIndex.parse(self._currentFilename).cursor
+            self._translationUnit = self._clangIndex.parse(self._currentFilename)
+            self._clangCursor = self._translationUnit.cursor
         except TranslationUnitLoadError:
             print 'Clang was unable to parse {}.'.format(filename)
             return

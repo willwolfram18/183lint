@@ -122,3 +122,16 @@ def evaluateBoolLiteralComparison(rubric, cursor):
     for c in cursor.get_children():
         evaluateBoolLiteralComparison(rubric, c)
 
+def evaluateLineLength(rubric, cursor):
+    for i in range(len(rubric._cleanLines.lines)):
+        if len(rubric._cleanLines.lines[i]) > rubric._maxLineLength:
+            rubric._addError('LINE_LENGTH', i + 1, rubric._maxLineLength + 1)
+
+def evaluateLibraries(rubric, cursor):
+    for lib in rubric._translationUnit.get_includes():
+        # Library name is last part of file name path
+        libName = lib.location.file.name.split('/')[-1]
+        if libName in rubric._prohibtedLibs:
+            rubric._addError('BANNED_INCLUDE', 1, 1)
+
+# TODO: Exit

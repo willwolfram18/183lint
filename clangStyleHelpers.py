@@ -86,3 +86,4 @@ def isSpacedCorrectly(code, index, isCompound):
     elif index + postOffset < len(code) and code[index + postOffset] not in [' ', '\n', '\r']:
         return False
     return  True
+
