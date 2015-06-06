@@ -52,7 +52,7 @@ class StyleError(object):
             'UNNECESSARY_BREAK': 'EECS 183 prohibits the use of break inside of any loop.',
             'EXIT': 'Do not use exit()',
             'CONTINUE': 'Do not use continue',
-            'BANNED_INCLUDE': 'You are not allowed to use that library',
+            'BANNED_INCLUDE': 'You have included {0}, a library that we have prohibited.'.format(self.data.get("library")),
         }
         if self.label in messages:
             self.message = messages[self.label]
