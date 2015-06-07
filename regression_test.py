@@ -63,7 +63,19 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
 
     def testGotoStatements(self):
-        pass
+        rubric = StyleRubric()
+
+        # TODO: Find the file paths
+        badTestName = 'test/goto_bad.cpp'
+        rubric.gradeFile(badTestName)
+        self.assertEqual(rubric._errorTypes['GOTO'], 1)
+        self.assertEqual(rubric._totalErrors, 1, assertionMessage(1, rubric._totalErrors, ['1 continue']))
+
+        rubric.resetRubric()
+        goodTestName = 'test/goto_good.cpp'
+        rubric.gradeFile(goodTestName)
+        self.assertEqual('GOTO' not in rubric._errorTypes, True)
+        self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
 
     def testInfiniteLoop(self):
         pass
