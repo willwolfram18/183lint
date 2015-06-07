@@ -1,10 +1,12 @@
 from StyleRubric import StyleRubric
 
 s = StyleRubric()
-for filename in ['break_bad.cpp', 'operator_spacing_good.cpp', 'operator_spacing_bad.cpp',
-                 'continue_good.cpp', 'continue_bad.cpp', 'goto_good.cpp', 'goto_bad.cpp',
-                 'while_true_bad.cpp', 'while_true_good.cpp', 'bool_comp.cpp', 'class_main.cpp',
-                 'compile_error.cpp']:
+# testnames = ['break_bad.cpp', 'operator_spacing_good.cpp', 'operator_spacing_bad.cpp',
+#              'continue_good.cpp', 'continue_bad.cpp', 'goto_good.cpp', 'goto_bad.cpp',
+#              'while_true_bad.cpp', 'while_true_good.cpp', 'bool_comp.cpp', 'class_main.cpp',
+#              'compile_error.cpp']
+testnames = ['break_bad.cpp', 'operator_spacing_good.cpp']
+for filename in testnames:
     filename = 'test/' + filename
     s.gradeFile(filename)
 

@@ -5,6 +5,7 @@ from cpplint import CleansedLines, RemoveMultiLineComments
 from StyleError import StyleError
 import sys
 
+
 _CLANG_LIB_LOCATION = '/usr/local/Cellar/llvm/3.5.1/lib'
 _LINE_LENGTH_LIMIT = 90
 _PROHIBITED_LIBRARIES = ['sstream']
@@ -13,9 +14,15 @@ _PROHIBITED_LIBRARIES = ['sstream']
 class StyleRubric(object):
     # Import helper functions
     from clangStyleHelpers import _cursorNotInFile, _findOperators, _operatorSpacingCheckHelper
+    SET_LIBRARY = True
 
     def __init__(self):
-        Config.set_library_path(_CLANG_LIB_LOCATION)
+        if StyleRubric.SET_LIBRARY:
+            Config.set_library_path(_CLANG_LIB_LOCATION)
+            StyleRubric.SET_LIBRARY = False
+        self.resetRubric()
+
+    def resetRubric(self):
         # 'Global' state -- SHOULD NOT BE MODIFIED AFTER INIT
         self._clangIndex = Index.create()
         self._styleFunctions = self._loadFunctions()
