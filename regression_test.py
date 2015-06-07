@@ -78,10 +78,27 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
 
     def testInfiniteLoop(self):
-        pass
+        rubric = StyleRubric()
+
+        # TODO: Fine the file paths
+        badTestName = 'test/while_true_bad.cpp'
+        rubric.gradeFile(badTestName)
+        self.assertEqual(rubric._errorTypes['INFINITE_LOOP'], 6)
+        self.assertEqual(rubric._totalErrors, 6, assertionMessage(6, rubric._totalErrors, ['6 infinite loops']))
+
+        goodTestName = 'test/while_true_good.cpp'
+        rubric.resetRubric()
+        rubric.gradeFile(goodTestName)
+        self.assertEqual('INFINITE_LOOP' not in rubric._errorTypes, True)
+        self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
 
     def testBoolComparison(self):
-        pass
+        rubric = StyleRubric()
+
+        badTestName = 'test/bool_comp.cpp'
+        rubric.gradeFile(badTestName)
+        self.assertEqual(rubric._errorTypes['COMPARISON_TO_BOOL'], 10)
+        self.assertEqual(rubric._totalErrors, 10, assertionMessage(10, rubric._totalErrors, ['10 while(true) loops']))
 
     def testCompileError(self):
         pass
