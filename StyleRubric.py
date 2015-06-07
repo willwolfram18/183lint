@@ -17,6 +17,8 @@ class StyleRubric(object):
     SET_LIBRARY = True
 
     def __init__(self):
+        # Prevent calling Config.set_library_path multiple times
+        # which causes the rubric to crash
         if StyleRubric.SET_LIBRARY:
             Config.set_library_path(_CLANG_LIB_LOCATION)
             StyleRubric.SET_LIBRARY = False

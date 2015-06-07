@@ -1,7 +1,9 @@
 import unittest
 from StyleRubric import StyleRubric
 
-def assertionMessage(expected, found, errorList):
+def assertionMessage(expected, found, errorList=[]):
+    if expected == 0:
+        return 'Should be 0 errors total, found {}.'.format(found)
     # Create a comma separated string
     errorString = errorList[0]
     if len(errorList) > 1:
@@ -42,11 +44,23 @@ class RegressionTest(unittest.TestCase):
         rubric.resetRubric()
         goodTestName = 'test/operator_spacing_good.cpp'
         rubric.gradeFile(goodTestName)
-        self.assertEqual('UNNECESSARY_BREAK' not in rubric._errorTypes, 0)
+        self.assertEqual('UNNECESSARY_BREAK' not in rubric._errorTypes, True)
         self.assertEqual(rubric._totalErrors, 2, assertionMessage(2, rubric._totalErrors, ['2 == true']))
 
     def testContinueStatements(self):
-        pass
+        rubric = StyleRubric()
+
+        # TODO: Find the file paths
+        badTestName = 'test/continue_bad.cpp'
+        rubric.gradeFile(badTestName)
+        self.assertEqual(rubric._errorTypes['CONTINUE'], 3)
+        self.assertEqual(rubric._totalErrors, 4, assertionMessage(4, rubric._totalErrors, ['3 continues', '1 infinite loop']))
+
+        rubric.resetRubric()
+        goodTestName = 'test/continue_good.cpp'
+        rubric.gradeFile(goodTestName)
+        self.assertEqual('CONTINUE' not in rubric._errorTypes, True)
+        self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
 
     def testGotoStatements(self):
         pass
