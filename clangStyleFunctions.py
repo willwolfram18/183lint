@@ -5,7 +5,7 @@ from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
 def __dir__():
     return [evaluateOperatorSpacing, evaluateTernaryOperator, evaluateBreakStatements,
             evaluateContinueStatements, evaluateGotoStatments, evaluateWhileTrue,
-            evaluateBoolLiteralComparison, evaluateLineLength]
+            evaluateBoolLiteralComparison, evaluateLineLength, evaluateLibraries]
 
 def evaluateOperatorSpacing(rubric, cursor):
     # Find all of the operators
@@ -131,7 +131,8 @@ def evaluateLibraries(rubric, cursor):
     for lib in rubric._translationUnit.get_includes():
         # Library name is last part of file name path
         libName = lib.location.file.name.split('/')[-1]
-        if libName in rubric._prohibtedLibs:
+        if libName in rubric._prohibitedLibs and libName not in rubric._foundLibs:
+            rubric._foundLibs.append(libName)
             rubric._addError('BANNED_INCLUDE', 1, 1, {'library': libName})
 
 # TODO: Exit

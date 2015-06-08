@@ -7,11 +7,6 @@ from StyleError import StyleError
 import sys
 
 
-_CLANG_LIB_LOCATION = '/usr/local/Cellar/llvm/3.5.1/lib'
-_LINE_LENGTH_LIMIT = 90
-_PROHIBITED_LIBRARIES = ['sstream']
-
-
 class StyleRubric(object):
     # Import helper functions
     from clangStyleHelpers import _cursorNotInFile, _findOperators, _operatorSpacingCheckHelper
@@ -45,6 +40,7 @@ class StyleRubric(object):
 
         self._maxLineLength = self.config.get('SETTINGS', 'line_length')
         self._prohibitedLibs = self.config.get('SETTINGS', 'prohibited_libraries').split(',')
+        self._foundLibs = []
 
     def _loadFunctions(self):
         return clangStyleFunctions.__dir__()
