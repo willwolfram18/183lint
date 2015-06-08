@@ -1,6 +1,7 @@
 from clang.cindex import Config, CursorKind, Index, TranslationUnitLoadError
 import clangStyleFunctions
 import codecs
+from ConfigParser import ConfigParser
 from cpplint import CleansedLines, RemoveMultiLineComments
 from StyleError import StyleError
 import sys
@@ -19,8 +20,10 @@ class StyleRubric(object):
     def __init__(self):
         # Prevent calling Config.set_library_path multiple times
         # which causes the rubric to crash
+        self.config = ConfigParser()
+        self.config.read('config.ini')
         if StyleRubric.SET_LIBRARY:
-            Config.set_library_path(_CLANG_LIB_LOCATION)
+            Config.set_library_path(self.config.get('CLANG_LOCATION', 'path'))
             StyleRubric.SET_LIBRARY = False
         self.resetRubric()
 
@@ -40,8 +43,8 @@ class StyleRubric(object):
         self._currentFilename = None
         self._cleanLines = None
 
-        self._maxLineLength = _LINE_LENGTH_LIMIT
-        self._prohibitedLibs = _PROHIBITED_LIBRARIES
+        self._maxLineLength = self.config.get('SETTINGS', 'line_length')
+        self._prohibitedLibs = self.config.get('SETTINGS', 'prohibited_libraries').split(',')
 
     def _loadFunctions(self):
         return clangStyleFunctions.__dir__()
