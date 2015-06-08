@@ -38,9 +38,10 @@ class StyleRubric(object):
         self._currentFilename = None
         self._cleanLines = None
 
-        self._maxLineLength = self.config.get('SETTINGS', 'line_length')
+        self._maxLineLength = int(self.config.get('SETTINGS', 'line_length'))
         self._prohibitedLibs = self.config.get('SETTINGS', 'prohibited_libraries').split(',')
         self._foundLibs = []
+        self._stdLib = False
 
     def _loadFunctions(self):
         return clangStyleFunctions.__dir__()
@@ -61,6 +62,8 @@ class StyleRubric(object):
         self._clangCursor = None
         self._currentFilename = None
         self._cleanLines = None
+        self._foundLibs = []
+        self._stdLib = False
 
     def _addError(self, label, line, column, data={}):
         self._totalErrors += 1
