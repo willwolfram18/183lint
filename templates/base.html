@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    {% block head %}
+    <title>183lint</title>
+    {% endblock %}
+
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles.css')}}">
+
+    <!-- jQuery and Bootstrap libraries -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</head>
+<body class="container-fluid">
+    <nav class="navbar navbar-inverse">
+        <div class="collapse navbar-collapse">
+            <a class="navbar-brand" href="/">183lint</a>
+            <ul class="nav navbar-nav">
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+                <li><a href="https://github.com/thewolfa2/183lint" target="_blank">Contribute</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div>
+        <!-- The main content of the page -->
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>
