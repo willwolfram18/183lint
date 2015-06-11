@@ -80,7 +80,7 @@ class RegressionTest(unittest.TestCase):
     def testInfiniteLoop(self):
         rubric = StyleRubric()
 
-        # TODO: Fine the file paths
+        # TODO: Find the file paths
         badTestName = 'test/while_true_bad.cpp'
         rubric.gradeFile(badTestName)
         self.assertEqual(rubric._errorTypes['INFINITE_LOOP'], 6)
@@ -100,8 +100,20 @@ class RegressionTest(unittest.TestCase):
         self.assertEqual(rubric._errorTypes['COMPARISON_TO_BOOL'], 10)
         self.assertEqual(rubric._totalErrors, 10, assertionMessage(10, rubric._totalErrors, ['10 while(true) loops']))
 
-    def testCompileError(self):
-        pass
+    def testLineLength(self):
+        rubric = StyleRubric()
+
+        # TODO: Find file path
+        badTestName = 'test/line_length.cpp'
+        rubric.gradeFile(badTestName)
+        self.assertEqual(rubric._errorTypes['LINE_LENGTH'], 1)
+        self.assertEqual(rubric._totalErrors, 1, assertionMessage(1, rubric._totalErrors, ['1 line length']))
+
+        rubric.resetRubric()
+        goodTestName = 'test/operator_spacing_good.cpp'
+        rubric.gradeFile(goodTestName)
+        self.assertEqual('LINE_LENGTH' not in rubric._errorTypes, True)
+        self.assertEqual(rubric._totalErrors, 2, assertionMessage(2, rubric._totalErrors, ['2 == true']))
 
 if __name__ == '__main__':
     unittest.main()

@@ -125,6 +125,7 @@ def evaluateBoolLiteralComparison(rubric, cursor):
 def evaluateLineLength(rubric, cursor):
     for i in range(len(rubric._cleanLines.lines)):
         line = rubric._cleanLines.lines[i]
+        if len(line) == 0: continue
         if line[-1] in ['\n', '\r']:
             line = line[:-1]
         if len(line) > rubric._maxLineLength:
