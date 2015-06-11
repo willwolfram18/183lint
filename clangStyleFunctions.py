@@ -124,13 +124,16 @@ def evaluateBoolLiteralComparison(rubric, cursor):
 
 def evaluateLineLength(rubric, cursor):
     data = rubric._safelyOpenFile()
-    if data == None: return
+    if data == None: 
+        return
     lineNum = 0
     for line in data:
         lineNum += 1
-        if len(line) == 0: continue
+        if len(line) == 0: 
+            continue
         # Remove the return character at the end of the line
-        if line[-1] in ['\n', '\r']: line = line[:-1]
+        if line[-1] in ['\n', '\r']: 
+            line = line[:-1]
         if len(line) > rubric._maxLineLength: 
             rubric._addError('LINE_LENGTH', lineNum, rubric._maxLineLength + 1)
 
@@ -141,7 +144,6 @@ def evaluateLibraries(rubric, cursor):
         if libName in rubric._prohibitedLibs and libName not in rubric._foundLibs:
             rubric._foundLibs.append(libName)
             rubric._addError('BANNED_INCLUDE', 1, 1, {'library': libName})
-        if libName == 'stdlib.h' or libName == 'cstdlib':
+        if (libName == 'stdlib.h' or libName == 'cstdlib') and not rubric._stdLib:
             rubric._stdLib = True
 
-# TODO: Exit
