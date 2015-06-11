@@ -106,8 +106,8 @@ class RegressionTest(unittest.TestCase):
         # TODO: Find file path
         badTestName = 'test/line_length.cpp'
         rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['LINE_LENGTH'], 1)
-        self.assertEqual(rubric._totalErrors, 1, assertionMessage(1, rubric._totalErrors, ['1 line length']))
+        self.assertEqual(rubric._errorTypes['LINE_LENGTH'], 2)
+        self.assertEqual(rubric._totalErrors, 2, assertionMessage(2, rubric._totalErrors, ['2 line length']))
 
         rubric.resetRubric()
         goodTestName = 'test/operator_spacing_good.cpp'

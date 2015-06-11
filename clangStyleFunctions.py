@@ -123,13 +123,16 @@ def evaluateBoolLiteralComparison(rubric, cursor):
         evaluateBoolLiteralComparison(rubric, c)
 
 def evaluateLineLength(rubric, cursor):
-    for i in range(len(rubric._cleanLines.lines)):
-        line = rubric._cleanLines.lines[i]
+    data = rubric._safelyOpenFile()
+    if data == None: return
+    lineNum = 0
+    for line in data:
+        lineNum += 1
         if len(line) == 0: continue
-        if line[-1] in ['\n', '\r']:
-            line = line[:-1]
-        if len(line) > rubric._maxLineLength:
-            rubric._addError('LINE_LENGTH', i + 1, rubric._maxLineLength + 1)
+        # Remove the return character at the end of the line
+        if line[-1] in ['\n', '\r']: line = line[:-1]
+        if len(line) > rubric._maxLineLength: 
+            rubric._addError('LINE_LENGTH', lineNum, rubric._maxLineLength + 1)
 
 def evaluateLibraries(rubric, cursor):
     for lib in rubric._translationUnit.get_includes():
