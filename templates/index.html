@@ -3,7 +3,15 @@
 {% block content %}
 <div class="container">
     <div class="jumbotron">
-        <h1 class="text-center">Welcome to 183lint!<h2>
+        <h1 class="text-center">Welcome to 183lint!</h1>
+        <p class="text-center">Evaluate the style of your C++ code according to the <a href="https://www.umich.edu/~eecs183/docs/style.html" target="_blank">EECS 183 standards</a></p>
+    </div>
+</div>
+
+<div id="input-files" class="container">
+    <div class="btn btn-default">
+        <span class="filename">Choose a file...</span>
+        <input class="hidden-file-input" type="file" accept=".cpp,.h">
     </div>
 </div>
 {% endblock %}
