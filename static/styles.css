@@ -13,6 +13,7 @@
 input[type=file].hidden-file-input {
     display: inline-block;
     position: absolute;
+    top: 0px;
     left: 0px;
-    /*opacity: 0;*/
+    opacity: 0;
 }
