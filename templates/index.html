@@ -8,13 +8,25 @@
     </div>
 </div>
 
-<div id="input-files" class="container">
-    <div class="btn btn-default file-input-btn">
-        <span class="filename">Choose a file...</span>
-        <input class="hidden-file-input" type="file" accept=".cpp,.h">
-    </div>
-</div>
-<div id="newBtn" class="btn btn-default">
-    Make button
+<div class="container">
+    <div class="row-fluid">
+        <h4 class="col-md-6 text-center">Select the file(s) you want to submit!</h4>
+        <h4 class="col-md-6 text-center">Submit once you've selected your files!</h4>
+        <div id="input-files" class="col-md-6 text-center">
+            <div class="btn btn-default file-input-btn">
+                <span class="filename">Choose a file...</span>
+                <input class="hidden-file-input" type="file" accept=".cpp,.h">
+            </div>
+            <br>
+            <div id="newBtn" class="btn btn-default">
+                Submit another file
+            </div>
+        </div>
+        <div class="col-md-6 text-center">
+            <div class="btn btn-primary disabled">
+                Submit
+            </div>
+        </div>
+    </div>  
 </div>
 {% endblock %}

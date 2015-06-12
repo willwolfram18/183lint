@@ -46,7 +46,7 @@ $(function(){
         $text.text('Choose a file...');
         $input.attr('accept', '.cpp,.h').attr('type', 'file');
         $container.append($text).append($input);
-        $('#input-files').append($container);
+        $('#newBtn').before($container).before('<br>');
         adjustInputSize($input);
         $input.change(handler_updateInputText)
     }

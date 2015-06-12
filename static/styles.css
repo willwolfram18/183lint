@@ -10,6 +10,10 @@
     position: relative;
 }
 
+#input-files .btn:not(:last-of-type) {
+    margin-bottom: 7px;
+}
+
 input[type=file].hidden-file-input {
     display: inline-block;
     position: absolute;
