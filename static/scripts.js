@@ -18,6 +18,20 @@ $(function(){
     $(window).resize(adjustInputSizes);
     $('.btn.file-input-btn').resize(adjustInputSizes);
 
+    $('#newBtn').click(createNewFileInput);
+
+    function handler_updateInputText() {
+        var filepath = $(this).val().split('\\'),
+            filename = filepath[filepath.length - 1],
+            $span = $(this).siblings('.filename');
+        if (filename == '') {
+            filename = 'Chose a file...';
+        }
+        $span.text(filename);
+        adjustInputSize($(this));
+    }
+    $('.hidden-file-input').change(handler_updateInputText);
+
     function createElement(tag, elementClass) {
         var $newElem = $(document.createElement(tag));
         if (elementClass)
@@ -30,10 +44,10 @@ $(function(){
             $input = createElement('input', 'hidden-file-input');
 
         $text.text('Choose a file...');
-        $input.attr('accept', '.cpp,.h').attr('type', 'file')
+        $input.attr('accept', '.cpp,.h').attr('type', 'file');
         $container.append($text).append($input);
         $('#input-files').append($container);
         adjustInputSize($input);
+        $input.change(handler_updateInputText)
     }
-    $('#newBtn').click(createNewFileInput);
 });
