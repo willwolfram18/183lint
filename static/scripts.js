@@ -24,11 +24,29 @@ $(function() {
 
     // Change text of button when a file is selected
     function handler_updateInputText() {
-        var filepath = $(this).val().split('\\'),
-            filename = filepath[filepath.length - 1],
-            $span = $(this).siblings('.filename');
-        if (filename == '') {
-            filename = 'Chose a file...';
+        var files = $(this)[0].files,
+            $span = $(this).siblings('.filename'),
+            filename;
+        if (files.length == 0) {
+            filename = "Choose a file..."
+            $(this).tooltip('destroy');
+        } else if (files.length == 1) {
+            filename = files[0].name;
+            $(this).tooltip('destroy');
+        } else {
+            filename = files.length + ' files';
+            var strVal = files[0].name;
+            for (var i = 1; i < files.length; i++) {
+                strVal += '<br>' + files[i].name
+            }
+            $(this).tooltip({
+                html: true,
+                placement: 'bottom',
+                title: strVal,
+            });
+            $(this).tooltip('hide')
+                   .attr('data-original-title', strVal)
+                   .tooltip('fixTitle');
         }
         $span.text(filename);
         // Button's auto wrap the $span, therefore adjust the size of the input field
@@ -43,7 +61,6 @@ $(function() {
             $newElem.addClass(elementClass);
         return $newElem
     }
-    var FILE_INDEX = 0;
     function createNewFileInput() {
         var $container = createElement('div', 'btn btn-default file-input-btn'),
             $text = createElement('span', 'filename'),
@@ -58,7 +75,7 @@ $(function() {
         $input.change(handler_updateInputText).change(handler_activateSubmitButton);
     }
     // Populate all input field programatically to enumerate input name attributes
-    createNewFileInput();
+    // createNewFileInput();
 
     // Toggle submit button whenever at least 1 input contains a file
     function handler_activateSubmitButton() {

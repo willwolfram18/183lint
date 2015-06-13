@@ -11,9 +11,14 @@
 <div class="container">
     <div class="row-fluid">
         <form id="input-files" class="col-md-6 text-center" action="upload" method="post" enctype="multipart/form-data">
+            <div class="btn btn-default file-input-btn">
+                <span class="filename">Choose a file...</span>
+                <input class="hidden-file-input" type="file" accept=".cpp,.h" name="files[]" multiple>
+            </div>
+            <!-- <br>
             <div id="newBtn" class="btn btn-default">
                 Submit another file
-            </div>
+            </div> -->
         </form>
         <div class="col-md-6 text-center">
             <div id="submit-btn" class="btn btn-primary disabled">
