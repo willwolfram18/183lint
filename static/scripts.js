@@ -43,19 +43,22 @@ $(function() {
             $newElem.addClass(elementClass);
         return $newElem
     }
+    var FILE_INDEX = 0;
     function createNewFileInput() {
         var $container = createElement('div', 'btn btn-default file-input-btn'),
             $text = createElement('span', 'filename'),
             $input = createElement('input', 'hidden-file-input');
 
         $text.text('Choose a file...');
-        $input.attr('accept', '.cpp,.h').attr('type', 'file');
+        $input.attr('accept', '.cpp,.h').attr('type', 'file').attr('name', 'file' + FILE_INDEX++);
         $container.append($text).append($input);
         $('#newBtn').before($container).before('<br>');
         adjustInputSize($input);
         // Apply the handlers to new elements that appear
         $input.change(handler_updateInputText).change(handler_activateSubmitButton);
     }
+    // Populate all input field programatically to enumerate input name attributes
+    createNewFileInput();
 
     // Toggle submit button whenever at least 1 input contains a file
     function handler_activateSubmitButton() {
@@ -73,5 +76,21 @@ $(function() {
     }
     $('.hidden-file-input').change(handler_activateSubmitButton);
 
-
+    function handler_uploadFiles() {
+        var formData = new FormData($('#input-files')[0]);
+        $.ajax('/upload_files', {
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function() {
+                console.log('Success!');
+            },
+            error: function() {
+                console.log('Error!');
+            },
+        });
+    }
+    $('#submit-btn').click(handler_uploadFiles);
 });

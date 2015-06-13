@@ -1,5 +1,5 @@
 from app import app
-from flask import render_template
+from flask import render_template, request
 
 @app.route('/')
 @app.route('/index')
@@ -13,3 +13,8 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
+
+@app.route('/upload_files', methods=['POST'])
+def gradeFiles():
+    print request.files.keys()
+    return 'Server received data'
