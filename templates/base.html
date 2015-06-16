@@ -35,6 +35,13 @@
                     <li><a href="/contact">Contact</a></li>
                     <li><a href="/contribute" target="_blank">Contribute</a></li>
                 </ul>
+                <p class="navbar-text navbar-right">
+                    {% if user is defined %}
+                    {{user}} (<a href="/logout">Logout</a>)
+                    {% else %}
+                    <a href="/login">Login</a>
+                    {% endif %}
+                </p>
             </div>
         </div>
     </nav>
