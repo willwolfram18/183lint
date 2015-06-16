@@ -16,5 +16,5 @@ def contact():
 
 @app.route('/upload_files', methods=['POST'])
 def gradeFiles():
-    print request.files.keys()
+    print request.files.getlist('files[]')
     return 'Server received data'
