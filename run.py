@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request
+import os.path
+from werkzeug import secure_filename
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
+app.config['UPLOAD_FOLDER'] = 'uploads/'
 
 
 @app.route('/')
@@ -23,10 +26,17 @@ def contribute():
 
 @app.route('/upload_files', methods=['POST'])
 def gradeFiles():
-    print request.files.getlist('files[]')
-    return 'Received the following files: {}'.format(request.files.getlist('files[]'))
+    receivedFiles = request.files.getlist('files[]')
+    savedFiles = []
+    for f in receivedFiles:
+        filename = secure_filename(f.filename)
+        if filename != '':
+            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            savedFiles.append(filename)
+    print 'The following files were saved: {}'.format(savedFiles)
+    return 'Success'
 
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=app.config['DEBUG'])
