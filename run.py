@@ -17,6 +17,10 @@ def about():
 def contact():
     return render_template('contact.html')
 
+@app.route('/contribute')
+def contribute():
+    return render_template('contribute.html')
+
 @app.route('/upload_files', methods=['POST'])
 def gradeFiles():
     print request.files.getlist('files[]')
