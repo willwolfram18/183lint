@@ -18,19 +18,27 @@ app.config['UPLOAD_FOLDER'] = 'uploads/'
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', loginUrl=google.login_url(prompt='select_account', params=dict(next=url_for('about'))))
+    if 'USERNAME' not in session:
+        session['USERNAME'] = None
+    return render_template('index.html', username=session['USERNAME'], current='index')
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    if 'USERNAME' not in session:
+        session['USERNAME'] = None
+    return render_template('about.html', username=session['USERNAME'], current='about')
 
 @app.route('/contact')
 def contact():
-    return render_template('contact.html')
+    if 'USERNAME' not in session:
+        session['USERNAME'] = None
+    return render_template('contact.html', username=session['USERNAME'], current='contact')
 
 @app.route('/contribute')
 def contribute():
-    return render_template('contribute.html')
+    if 'USERNAME' not in session:
+        session['USERNAME'] = None
+    return render_template('contribute.html', username=session['USERNAME'], current='contribute')
 
 @app.route('/upload_files', methods=['POST'])
 def gradeFiles():
@@ -44,10 +52,24 @@ def gradeFiles():
     print 'The following files were saved: {}'.format(savedFiles)
     return 'Success'
 
+@app.route('/login', methods=['GET'])
+def login():
+    if 'USERNAME' not in session:
+        session['USERNAME'] = None
+    return redirect(google.login_url(prompt="select_account", params=dict(next=request.args.get('next'))))
+
+@app.route('/logout')
+def logout():
+    session['USERNAME'] = None
+    return redirect(url_for('index'))
+
 @app.route('/oauth2callback')
 @google.oauth2callback
 def callback(token, userinfo, **params):
-    return redirect(url_for('about'))
+    session['USERNAME'] = userinfo['name']
+    session['USER_ID'] = userinfo['id']
+    session['TOKEN'] = token
+    return redirect(url_for(params['next']))
 
 if __name__ == '__main__':
     app.run(debug=app.config['DEBUG'])

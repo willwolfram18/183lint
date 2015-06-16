@@ -8,23 +8,24 @@
     </div>
 </div>
 
+
 <div class="container">
-    <div class="row-fluid">
-        <form id="input-files" action="upload" method="post" enctype="multipart/form-data">
-            <div class="btn btn-default file-input-btn col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-12">
-                <span class="filename">Choose a file...</span>
-                <input class="hidden-file-input" type="file" accept=".cpp,.h,.cc,.c" name="files[]" multiple>
+    {% if username is not none %}
+        <div class="row-fluid">
+            <form id="input-files" action="upload" method="post" enctype="multipart/form-data">
+                <div class="btn btn-default file-input-btn col-md-4 col-md-offset-1 col-sm-4 col-sm-offset-1 col-xs-12">
+                    <span class="filename">Choose a file...</span>
+                    <input class="hidden-file-input" type="file" accept=".cpp,.h,.cc,.c" name="files[]" multiple>
+                </div>
+            </form>
+            <div>
+                <div id="submit-btn" class="btn btn-primary disabled col-md-4 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-12">
+                    Submit
+                </div>
             </div>
-            <!-- <br>
-            <div id="newBtn" class="btn btn-default">
-                Submit another file
-            </div> -->
-        </form>
-        <div>
-            <div id="submit-btn" class="btn btn-primary disabled col-md-4 col-md-offset-2 col-sm-4 col-sm-offset-2 col-xs-12">
-                Submit
-            </div>
-        </div>
-    </div>  
+        </div>  
+    {% else %}
+        <h2 class="text-center">Interested in submitting? Feel free to <a href="/login?next={{current}}">login</a> using your Google Account!</h2>
+    {% endif %}
 </div>
 {% endblock %}
