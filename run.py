@@ -24,7 +24,7 @@ def contribute():
 @app.route('/upload_files', methods=['POST'])
 def gradeFiles():
     print request.files.getlist('files[]')
-    return 'Server received data'
+    return 'Received the following files: {}'.format(request.files.getlist('files[]'))
 
 
 

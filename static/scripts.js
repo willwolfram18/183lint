@@ -20,8 +20,6 @@ $(function() {
     $(window).resize(adjustInputSizes);
     $('.btn.file-input-btn').resize(adjustInputSizes);
 
-    $('#newBtn').click(createNewFileInput);
-
     // Change text of button when a file is selected
     function handler_updateInputText() {
         var files = $(this)[0].files,
@@ -61,23 +59,13 @@ $(function() {
             $newElem.addClass(elementClass);
         return $newElem
     }
-    function createNewFileInput() {
-        var $container = createElement('div', 'btn btn-default file-input-btn'),
-            $text = createElement('span', 'filename'),
-            $input = createElement('input', 'hidden-file-input');
-
-        $text.text('Choose a file...');
-        $input.attr('accept', '.cpp,.h').attr('type', 'file').attr('name', 'file' + FILE_INDEX++);
-        $container.append($text).append($input);
-        $('#newBtn').before($container).before('<br>');
-        adjustInputSize($input);
-        // Apply the handlers to new elements that appear
-        $input.change(handler_updateInputText).change(handler_activateSubmitButton);
-    }
-    // Populate all input field programatically to enumerate input name attributes
-    // createNewFileInput();
 
     // Toggle submit button whenever at least 1 input contains a file
+    function clearButtons() {
+        $('#input-files')[0].reset();
+        $('.hidden-file-input').trigger('change');
+        handler_activateSubmitButton(); // deactivates button
+    }
     function handler_activateSubmitButton() {
         var isActive = false;
         $('.hidden-file-input').each(function() {
@@ -103,6 +91,7 @@ $(function() {
             processData: false,
             success: function() {
                 console.log('Success!');
+                clearButtons();
             },
             error: function() {
                 console.log('Error!');
