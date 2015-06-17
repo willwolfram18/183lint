@@ -1,5 +1,7 @@
+from functools import wraps
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_googlelogin import GoogleLogin
+from os import mkdir
 import os.path
 from werkzeug import secure_filename
 
@@ -12,7 +14,16 @@ app.config['GOOGLE_LOGIN_REDIRECT_URI'] = 'http://localhost:5000/oauth2callback'
 google = GoogleLogin(app)
 
 app.config['DEBUG'] = True
-app.config['UPLOAD_FOLDER'] = 'uploads/'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session['USERNAME'] is None:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 
 @app.route('/')
@@ -41,17 +52,23 @@ def contribute():
     return render_template('contribute.html', username=session['USERNAME'], current='contribute')
 
 @app.route('/upload_files', methods=['POST'])
+@login_required
 def gradeFiles():
     receivedFiles = request.files.getlist('files[]')
     savedFiles = []
     for f in receivedFiles:
         filename = secure_filename(f.filename)
         if filename != '':
-            f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            pathname = '/'.join([app.config['UPLOAD_FOLDER'], session['USER_ID']])
+            if not os.path.exists(os.path.join(pathname)):
+                mkdir(pathname)
+            f.save(os.path.join(pathname, filename))
             savedFiles.append(filename)
     print 'The following files were saved: {}'.format(savedFiles)
     return 'Success'
 
+
+# Functions for Logging in and out using Google
 @app.route('/login', methods=['GET'])
 def login():
     if 'USERNAME' not in session:
