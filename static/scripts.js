@@ -81,6 +81,19 @@ $(function() {
     }
     $('.hidden-file-input').change(handler_activateSubmitButton);
 
+
+    var spinnerOpts = {
+        radius: 30,
+        length: 30,
+        position: 'relative',
+    };
+    var $spinner = new Spinner(spinnerOpts);
+    function showSpinner() {
+        $spinner.spin($('#spinner')[0]);
+    }
+    function hideSpinner() {
+        $spinner.stop();;
+    }
     function handler_uploadFiles() {
         var formData = new FormData($('#input-files')[0]);
         $.ajax('/upload_files', {
@@ -89,6 +102,7 @@ $(function() {
             contentType: false,
             cache: false,
             processData: false,
+            beforeSend: showSpinner,
             success: function() {
                 console.log('Success!');
                 clearButtons();
@@ -96,6 +110,7 @@ $(function() {
             error: function() {
                 console.log('Error!');
             },
+            // complete: hideSpinner,
         });
     }
     $('#submit-btn').click(handler_uploadFiles);

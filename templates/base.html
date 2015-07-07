@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.4/spin.min.js"></script>
+
     <!-- Custom styles and JS -->
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles.css')}}">
     <script src="{{url_for('static', filename='scripts.js')}}"></script>
@@ -33,7 +35,7 @@
                 <ul class="nav navbar-nav">
                     <li><a href="/about">About</a></li>
                     <li><a href="/contact">Contact</a></li>
-                    <li><a href="/contribute" target="_blank">Contribute</a></li>
+                    <li><a href="/contribute">Contribute</a></li>
                 </ul>
                 <p class="navbar-text navbar-right">
                     {% if username is not none %}
