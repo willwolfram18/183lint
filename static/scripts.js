@@ -89,6 +89,7 @@ $(function() {
     };
     var $spinner = new Spinner(spinnerOpts);
     function showSpinner() {
+        $('#results').addClass('hidden').text('');
         $spinner.spin($('#spinner')[0]);
     }
     function hideSpinner() {
@@ -103,14 +104,15 @@ $(function() {
             cache: false,
             processData: false,
             beforeSend: showSpinner,
-            success: function() {
+            success: function(data) {
                 console.log('Success!');
                 clearButtons();
+                $('#results').removeClass('hidden').text(data);
             },
             error: function() {
                 console.log('Error!');
             },
-            // complete: hideSpinner,
+            complete: hideSpinner,
         });
     }
     $('#submit-btn').click(handler_uploadFiles);

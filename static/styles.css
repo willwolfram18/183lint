@@ -25,3 +25,7 @@ input[type=file].hidden-file-input {
 .tooltip {
     text-shadow: 0px 0px black;
 }
+
+#results {
+    margin-top: 15px;
+}
