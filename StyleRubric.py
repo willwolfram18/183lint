@@ -98,3 +98,15 @@ class StyleRubric(object):
         # Grade the file
         for func in self._styleFunctions:
             func(self, self._clangCursor)
+
+        self._fileErrors[self._currentFilename].sort()
+
+    def generateReport(self):
+        report = {}
+        for filename, errors in self._fileErrors.iteritems():
+            f = filename.split('/')[-1]
+            report[f] = []
+            for e in errors:
+                report[f].append('{}:{}:{} {}'.format(f, e.lineNum, e.colNum, e.message))
+        return report
+
