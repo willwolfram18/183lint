@@ -107,7 +107,12 @@ $(function() {
             success: function(data) {
                 console.log('Success!');
                 clearButtons();
-                $('#results').removeClass('hidden').text(data);
+                $('#results').removeClass('hidden');
+                var results = '';
+                for (key in data) {
+                    results += key + ', ';
+                }
+                $('#results').text(results);
             },
             error: function() {
                 console.log('Error!');

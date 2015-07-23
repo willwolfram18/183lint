@@ -1,11 +1,16 @@
+from ConfigParser import ConfigParser
 from functools import wraps
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from flask_googlelogin import GoogleLogin
 from os import mkdir
 import os.path
+from StyleRubric import StyleRubric
 from werkzeug import secure_filename
 
 app = Flask(__name__)
+
+config = ConfigParser()
+config.read('config.ini')
 
 app.config['SECRET_KEY'] = ''
 app.config['GOOGLE_LOGIN_CLIENT_ID'] = ''
@@ -14,7 +19,7 @@ app.config['GOOGLE_LOGIN_REDIRECT_URI'] = 'http://localhost:5000/oauth2callback'
 google = GoogleLogin(app)
 
 app.config['DEBUG'] = True
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = config.get('SETTINGS', 'upload_location')
 
 def login_required(f):
     @wraps(f)
@@ -64,8 +69,12 @@ def gradeFiles():
                 mkdir(pathname)
             f.save(os.path.join(pathname, filename))
             savedFiles.append(filename)
-    print 'The following files were saved: {}'.format(savedFiles)
-    return 'Success'
+    
+    rubric = StyleRubric()
+    for f in savedFiles:
+        rubric.gradeFile(f)
+
+    return jsonify(rubric.generateReport())
 
 
 # Functions for Logging in and out using Google
