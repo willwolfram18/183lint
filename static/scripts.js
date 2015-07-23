@@ -95,6 +95,29 @@ $(function() {
     function hideSpinner() {
         $spinner.stop();;
     }
+    function handler_parseResponse(data) {
+        console.log('Success!');
+        clearButtons();
+        $('#results').removeClass('hidden');
+        var results = '';
+        for (key in data) {
+            if (results != '') {
+                results += '\n\n';
+            }
+            results += 'Results for ' + key + ':\n'
+            if (data[key].length == 0) {
+                results += '  No errors found! :D'
+            } else {
+                for (var i = 0; i < data[key].length; i++) {
+                    results += '  ' + data[key][i];
+                    if (i != data[key].length - 1) {
+                        results += '\n';
+                    }
+                }
+            }
+        }
+        $('#results').text(results);
+    }
     function handler_uploadFiles() {
         var formData = new FormData($('#input-files')[0]);
         $.ajax('/upload_files', {
@@ -104,16 +127,7 @@ $(function() {
             cache: false,
             processData: false,
             beforeSend: showSpinner,
-            success: function(data) {
-                console.log('Success!');
-                clearButtons();
-                $('#results').removeClass('hidden');
-                var results = '';
-                for (key in data) {
-                    results += key + ', ';
-                }
-                $('#results').text(results);
-            },
+            success: handler_parseResponse,
             error: function() {
                 console.log('Error!');
             },

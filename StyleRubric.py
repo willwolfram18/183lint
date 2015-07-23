@@ -3,6 +3,7 @@ import clangStyleFunctions
 import codecs
 from ConfigParser import ConfigParser
 from cpplint import CleansedLines, RemoveMultiLineComments
+import os.path
 from StyleError import StyleError
 import sys
 
@@ -104,9 +105,10 @@ class StyleRubric(object):
     def generateReport(self):
         report = {}
         for filename, errors in self._fileErrors.iteritems():
-            f = filename.split('/')[-1]
+            # Use filenames as keys to the Report
+            f = os.path.split(filename)[1]
             report[f] = []
             for e in errors:
-                report[f].append('{}:{}:{} {}'.format(f, e.lineNum, e.colNum, e.message))
+                report[f].append('Line {}, Column {}: {}'.format(e.lineNum, e.colNum, e.message))
         return report
 

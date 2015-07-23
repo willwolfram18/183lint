@@ -64,10 +64,11 @@ def gradeFiles():
     for f in receivedFiles:
         filename = secure_filename(f.filename)
         if filename != '':
-            pathname = '/'.join([app.config['UPLOAD_FOLDER'], session['USER_ID']])
-            if not os.path.exists(os.path.join(pathname)):
+            pathname = os.path.join(app.config['UPLOAD_FOLDER'], session['USER_ID'])
+            if not os.path.exists(pathname):
                 mkdir(pathname)
-            f.save(os.path.join(pathname, filename))
+            filename = os.path.join(pathname, filename)
+            f.save(filename)
             savedFiles.append(filename)
     
     rubric = StyleRubric()
