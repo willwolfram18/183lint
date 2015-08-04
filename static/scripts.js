@@ -93,30 +93,50 @@ $(function() {
         $spinner.spin($('#spinner')[0]);
     }
     function hideSpinner() {
-        $spinner.stop();;
+        $spinner.stop();
     }
     function handler_parseResponse(data) {
         console.log('Success!');
         clearButtons();
         $('#results').removeClass('hidden');
-        var results = '';
+        // var results = '';
+        // for (key in data) {
+        //     if (results != '') {
+        //         results += '\n\n';
+        //     }
+        //     results += 'Results for ' + key + ':\n'
+        //     if (data[key].length == 0) {
+        //         results += '  No errors found! :D'
+        //     } else {
+        //         for (var i = 0; i < data[key].length; i++) {
+        //             results += '  ' + data[key][i];
+        //             if (i != data[key].length - 1) {
+        //                 results += '\n';
+        //             }
+        //         }
+        //     }
+        // }
+        // $('#results').text(results);
         for (key in data) {
-            if (results != '') {
-                results += '\n\n';
-            }
-            results += 'Results for ' + key + ':\n'
-            if (data[key].length == 0) {
-                results += '  No errors found! :D'
-            } else {
-                for (var i = 0; i < data[key].length; i++) {
-                    results += '  ' + data[key][i];
-                    if (i != data[key].length - 1) {
-                        results += '\n';
-                    }
-                }
-            }
+            var $panel = createElement('div', 'panel panel-default'),
+                $heading = createElement('div', 'panel-heading'),
+                $headingText = createElement('a'),
+                $headingTitle = createElement('h4', 'panel-title'),
+                $collapse = createElement('div', 'panel-collapse collapse'),
+                $content = createElement('div', 'panel-body');
+
+            $headingText.text(key).attr('data-toggle', 'collapse')
+                        .attr('data-target', '#results #results_' + key).attr('data-parent', '#results')
+                        .attr('role', 'button');
+            $headingTitle.append($headingText);
+            $heading.append($headingTitle);
+
+            $content.text('Results!');
+            $collapse.attr('id', 'results_' + key).append($content);
+
+            $panel.append($collapse).prepend($heading);
+            $('#results').append($panel);
         }
-        $('#results').text(results);
     }
     function handler_uploadFiles() {
         var formData = new FormData($('#input-files')[0]);
