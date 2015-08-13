@@ -95,47 +95,47 @@ $(function() {
     function hideSpinner() {
         $spinner.stop();
     }
+    function createCollapsePanel(fileName, report, errorFree) {
+        var $panel = createElement('div', 'panel panel-default'),
+            $heading = createElement('div', 'panel-heading'),
+            $headingText = createElement('a'),
+            $headingTitle = createElement('h4', 'panel-title'),
+            $collapse = createElement('div', 'panel-collapse collapse'),
+            $content = createElement('div', 'panel-body');
+
+        if (errorFree) {
+            $heading.toggleClass('errorFree');
+        }
+
+        $headingText.text(fileName).attr('data-toggle', 'collapse')
+                    .attr('href', '#' + fileName.replace('.', '_'))
+                    .attr('data-parent', '#results');
+        $headingTitle.append($headingText);
+        $heading.append($headingTitle);
+
+        $content.html(report);
+        $collapse.attr('id', fileName.replace('.', '_')).append($content); 
+
+        $panel.append($collapse).prepend($heading);
+        $('#results').append($panel);
+    }
     function handler_parseResponse(data) {
         console.log('Success!');
         clearButtons();
         $('#results').removeClass('hidden');
-        // var results = '';
-        // for (key in data) {
-        //     if (results != '') {
-        //         results += '\n\n';
-        //     }
-        //     results += 'Results for ' + key + ':\n'
-        //     if (data[key].length == 0) {
-        //         results += '  No errors found! :D'
-        //     } else {
-        //         for (var i = 0; i < data[key].length; i++) {
-        //             results += '  ' + data[key][i];
-        //             if (i != data[key].length - 1) {
-        //                 results += '\n';
-        //             }
-        //         }
-        //     }
-        // }
-        // $('#results').text(results);
         for (key in data) {
-            var $panel = createElement('div', 'panel panel-default'),
-                $heading = createElement('div', 'panel-heading'),
-                $headingText = createElement('a'),
-                $headingTitle = createElement('h4', 'panel-title'),
-                $collapse = createElement('div', 'panel-collapse collapse'),
-                $content = createElement('div', 'panel-body');
-
-            $headingText.text(key).attr('data-toggle', 'collapse')
-                        .attr('data-target', '#results #results_' + key).attr('data-parent', '#results')
-                        .attr('role', 'button');
-            $headingTitle.append($headingText);
-            $heading.append($headingTitle);
-
-            $content.text('Results!');
-            $collapse.attr('id', 'results_' + key).append($content);
-
-            $panel.append($collapse).prepend($heading);
-            $('#results').append($panel);
+            var report = '';
+            if (data[key].length == 0) {
+                report = "No errors found! :D"
+            } else {
+                for (var i = 0; i < data[key].length; i++) {
+                    report += data[key][i]
+                    if (i != data[key].length - 1) {
+                        report += '<br>';
+                    }
+                }
+            }
+            createCollapsePanel(key, report, data[key].length == 0);
         }
     }
     function handler_uploadFiles() {
@@ -150,6 +150,7 @@ $(function() {
             success: handler_parseResponse,
             error: function() {
                 console.log('Error!');
+                hideSpinner();
             },
             complete: hideSpinner,
         });
