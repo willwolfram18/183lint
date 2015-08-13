@@ -42,3 +42,13 @@ input[type=file].hidden-file-input {
 #results .panel-heading.errorFree {
     background-color: #27ae60;
 }
+
+.caption {
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+#lintImg, #issueImg {
+    width: 250px;
+    box-shadow: 1px 1px 13px rgba(155,115,135,0.3);
+}
