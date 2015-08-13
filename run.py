@@ -7,19 +7,21 @@ import os.path
 from StyleRubric import StyleRubric
 from werkzeug import secure_filename
 
-app = Flask(__name__)
-
 config = ConfigParser()
 config.read('config.ini')
 
+app = Flask(__name__)
+app.config['DEBUG'] = True
+app.config['UPLOAD_FOLDER'] = config.get('SETTINGS', 'upload_location')
+
 app.config['SECRET_KEY'] = ''
+
+# Google Info for Google Login
 app.config['GOOGLE_LOGIN_CLIENT_ID'] = ''
 app.config['GOOGLE_LOGIN_CLIENT_SECRET'] = ''
 app.config['GOOGLE_LOGIN_REDIRECT_URI'] = 'http://localhost:5000/oauth2callback'
+                                                                                
 google = GoogleLogin(app)
-
-app.config['DEBUG'] = True
-app.config['UPLOAD_FOLDER'] = config.get('SETTINGS', 'upload_location')
 
 def login_required(f):
     @wraps(f)
