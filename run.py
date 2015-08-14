@@ -1,6 +1,7 @@
 from ConfigParser import ConfigParser
 from functools import wraps
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask.ext.assets import Environment, Bundle
 from flask_googlelogin import GoogleLogin
 from os import mkdir
 import os.path
@@ -22,6 +23,10 @@ app.config['GOOGLE_LOGIN_CLIENT_SECRET'] = ''
 app.config['GOOGLE_LOGIN_REDIRECT_URI'] = 'http://localhost:5000/oauth2callback'
                                                                                 
 google = GoogleLogin(app)
+assets = Environment(app)
+assets.url = app.static_url_path
+sass = Bundle('presentation/styles.scss', filters="pyscss", output="presentation/styles.css")
+assets.register('scss_all', sass)
 
 def login_required(f):
     @wraps(f)

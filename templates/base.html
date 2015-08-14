@@ -15,7 +15,9 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/1.2.4/spin.min.js"></script>
 
     <!-- Custom styles and JS -->
-    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='presentation/styles.css')}}">
+    {% assets "scss_all" %}
+        <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}">
+    {% endassets %}
     <script src="{{url_for('static', filename='functionality/scripts.js')}}"></script>
 
 </head>
