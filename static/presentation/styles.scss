@@ -1,0 +1,35 @@
+#content {
+    margin-top: 75px;
+}
+
+#input-files {
+    .btn {
+        position: relative;
+    }
+}
+
+input[type=file].hidden-file-input {
+    display: inline-block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    opacity: 0;
+}
+
+.tooltip {
+    text-shadow: 0px 0px black;
+}
+
+#results {
+    margin-top: 15px;
+    .panel-body {
+        font-family: monospace;
+    }
+    .panel-heading {
+        background-image: none;
+        background-color: #e74c3c;
+        &.errorFree {
+            background-color: #27ae60;
+        }
+    }
+}
