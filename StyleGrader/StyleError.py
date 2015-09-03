@@ -40,6 +40,11 @@ class StyleError(object):
         else:
             return False
 
+    def __str__(self):
+        if not self.message:
+            self._setMessage()
+        return self.message
+
     def _setMessage(self):
         messages = {
             'UNARY_OPERATOR_SPACING': 'Incorrect spacing around the unary {} operator.'.format(self.data.get('operator')),

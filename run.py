@@ -5,7 +5,7 @@ from flask.ext.assets import Environment, Bundle
 from flask_googlelogin import GoogleLogin
 from os import mkdir
 import os.path
-from StyleRubric import StyleRubric
+from StyleGrader import StyleRubric
 from werkzeug import secure_filename
 
 config = ConfigParser()
