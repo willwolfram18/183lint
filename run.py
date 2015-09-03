@@ -50,6 +50,7 @@ def about():
     if 'USERNAME' not in session:
         session['USERNAME'] = None
     # Data to display on the about page
+    styleGuideURL = "https://eecs183.org/docs/style/"
     panels = [
         {
             'id': 'panel-0',
@@ -68,7 +69,7 @@ def about():
             'id': 'panel-2',
             'title': 'What does 183lint check?',
             'description': '183lint is capable of checking the following aspects of C++ code, according to the standards in the ' +
-                           '<a _target="blank" href="https://eecs183.org/2015/winter/docs/style.html">EECS 183 Style Guidelines</a>.',
+                           '<a _target="blank" href="{}}">EECS 183 Style Guidelines</a>.'.format(styleGuideURL),
             'bullets': [
                 'Correct operator spacing',
                 'Improper use of the ternary operator',
