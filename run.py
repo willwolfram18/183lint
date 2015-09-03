@@ -49,7 +49,40 @@ def index():
 def about():
     if 'USERNAME' not in session:
         session['USERNAME'] = None
-    return render_template('about.html', username=session['USERNAME'], current='about')
+    # Data to display on the about page
+    panels = [
+        {
+            'id': 'panel-0',
+            'title': 'Why was 183lint built?',
+            'description': '183lint is a program designed for the EECS 183 course at the University of Michigan.' +
+                           ' It was created as a way to give students the ability to check some aspects of their C++ code quality.',
+        },
+        {
+            'id': 'panel-1',
+            'title': 'How does 183lint work?',
+            'description': '183lint is built using Python\'s Flask, and uses Python\'s bindings to Clang in order' +
+                           ' to parse the submitted code.  For information on the Clang bindings, feel free to read ' +
+                           '<a href="http://eli.thegreenplace.net/2011/07/03/parsing-c-in-python-with-clang">this</a>.',
+        },
+        {
+            'id': 'panel-2',
+            'title': 'What does 183lint check?',
+            'description': '183lint is capable of checking the following aspects of C++ code, according to the standards in the ' +
+                           '<a _target="blank" href="https://eecs183.org/2015/winter/docs/style.html">EECS 183 Style Guidelines</a>.',
+            'bullets': [
+                'Correct operator spacing',
+                'Improper use of the ternary operator',
+                'Improper use of a <tt>break</tt> statement',
+                'Improper use of a <tt>continue</tt> statement',
+                'Any use of a <tt>goto</tt> statement',
+                'Continuous loops using <tt>while(true)</tt> or <tt>while(!false)</tt>',
+                'Comparison to boolean literals such as <tt>x == true</tt>',
+                'Each line does not exceed the suggested {} character limit'.format(config.get('SETTINGS', 'line_length')),
+                'Files do not include any excluded libraries'
+            ],
+        },
+    ]
+    return render_template('about.html', username=session['USERNAME'], current='about', panels=panels)
 
 @app.route('/contact')
 def contact():

@@ -31,5 +31,29 @@ input[type=file].hidden-file-input {
         &.errorFree {
             background-color: #27ae60;
         }
+        a {
+            &:visited, &:hover, &:active, &:focus {
+                text-decoration: none;
+            }
+        }
+    }
+}
+
+.lintImg {
+    height: 250px;
+    box-shadow: 1px 1px 10px rgba(0,0,0,0.35);
+    margin-top: 8px;
+}
+
+#aboutLint {
+    .panel-heading {
+        a {
+            &:visited, &:hover, &:active, &:focus {
+                text-decoration: none;
+            }
+            &:focus:not(:hover) {
+                color: #337ab7;
+            }
+        }
     }
 }

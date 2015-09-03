@@ -23,3 +23,17 @@ input[type=file].hidden-file-input {
           background-color: #e74c3c; }
           #results .panel-heading.errorFree {
             background-color: #27ae60; }
+            #results .panel-heading a:visited, #results .panel-heading a:hover,
+            #results .panel-heading a:active, #results .panel-heading a:focus {
+              text-decoration: none; }
+
+.lintImg {
+  height: 250px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.35);
+  margin-top: 8px; }
+
+  #aboutLint .panel-heading a:visited, #aboutLint .panel-heading a:hover,
+  #aboutLint .panel-heading a:active, #aboutLint .panel-heading a:focus {
+    text-decoration: none; }
+    #aboutLint .panel-heading a:focus:not(:hover) {
+      color: #337ab7; }

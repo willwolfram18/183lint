@@ -1,5 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p>This is the about page!</p>
+<div id="aboutLint" class="col-md-12 col-sm-12 col-xs-12 panel-group">
+    {% for panel in panels %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>
+                    <a data-toggle="collapse" data-parent="#aboutLint" href="#{{ panel['id'] }}">{{ panel["title"] }}</a>
+                </h4>
+            </div>
+            <div class="panel-collapse collapse" id="{{ panel['id'] }}">
+                <div class="panel-body">
+                    {{ panel["description"]|safe }}
+                    {% if panel["bullets"] is not none %}
+                        <ul>
+                        {% for b in panel["bullets"] %}
+                            <li>{{ b|safe }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
 {% endblock %}
