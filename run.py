@@ -69,7 +69,7 @@ def about():
             'id': 'panel-2',
             'title': 'What does 183lint check?',
             'description': '183lint is capable of checking the following aspects of C++ code, according to the standards in the ' +
-                           '<a _target="blank" href="{}}">EECS 183 Style Guidelines</a>.'.format(styleGuideURL),
+                           '<a _target="blank" href="{}">EECS 183 Style Guidelines</a>.'.format(styleGuideURL),
             'bullets': [
                 'Correct operator spacing',
                 'Improper use of the ternary operator',
