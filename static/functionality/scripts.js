@@ -150,6 +150,15 @@ $(function() {
             success: handler_parseResponse,
             error: function() {
                 console.log('Error!');
+		var errorDiv = createElement("div", "server-error-msg");
+		errorDiv.html("The style grader encountered an error. Please " +
+			      "create a new issue on the GitHub repository " +
+			      "<a href=\"https://github.com/TheWolfA2/183lint/issues\">here</a>" +
+			      " and attach the file(s) that were submitted when " +
+			      " the error occurred.");
+		$("#results").append(errorDiv);
+		$("#results").toggleClass("hidden");
+		clearButtons();		
                 hideSpinner();
             },
             complete: hideSpinner,

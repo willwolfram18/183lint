@@ -61,18 +61,18 @@ def about():
         {
             'id': 'panel-1',
             'title': 'How does 183lint work?',
-            'description': '183lint is built using Python\'s Flask, and uses Python\'s bindings to Clang in order' +
+            'description': '183lint is built using Python\'s Flask library, and uses Python\'s bindings to Clang in order' +
                            ' to parse the submitted code.  For information on the Clang bindings, feel free to read ' +
-                           '<a href="http://eli.thegreenplace.net/2011/07/03/parsing-c-in-python-with-clang">this</a>.',
+                           '<a href="http://eli.thegreenplace.net/2011/07/03/parsing-c-in-python-with-clang">this article</a>.',
         },
         {
             'id': 'panel-2',
             'title': 'What does 183lint check?',
             'description': '183lint is capable of checking the following aspects of C++ code, according to the standards in the ' +
-                           '<a _target="blank" href="{}">EECS 183 Style Guidelines</a>.'.format(styleGuideURL),
+                           '<a target="_blank" href="{}">EECS 183 Style Guidelines</a>.'.format(styleGuideURL),
             'bullets': [
                 'Correct operator spacing',
-                'Improper use of the ternary operator',
+                'Use of the ternary operator',
                 'Improper use of a <tt>break</tt> statement',
                 'Improper use of a <tt>continue</tt> statement',
                 'Any use of a <tt>goto</tt> statement',

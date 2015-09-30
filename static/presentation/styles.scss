@@ -25,6 +25,14 @@ input[type=file].hidden-file-input {
     .panel-body {
         font-family: monospace;
     }
+    .server-error-msg {
+    	background-color: #ffeeee;
+	color: red;
+	font-size: 16px;
+	font-weight: bold;
+	border-radius: 2px;
+	padding: 6px;
+    }
     .panel-heading {
         background-image: none;
         background-color: #e74c3c;
