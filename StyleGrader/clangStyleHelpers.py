@@ -82,7 +82,7 @@ def isCompoundBinaryOperator(code, column):
 def isSpacedCorrectly(code, index, isCompound):
     postOffset = 2 if isCompound else 1
     # Checking spacing in front of operator
-    if index - 1 >= 0 and code[index - 1] not in [' ', '\n', '\r']:
+    if index - 1 >= 0 and index - 1 < len(code) and code[index - 1] not in [' ', '\n', '\r']:
         return False
     # Check spacing following operator
     elif index + postOffset < len(code) and code[index + postOffset] not in [' ', '\n', '\r']:

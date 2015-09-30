@@ -44,7 +44,7 @@ def evaluateOperatorSpacing(rubric, cursor):
                 nextStartOfLine[lineNumber] += 1
             else:
                 # Check for white space or ( in front, and no whitespace behind it
-                if (index - 1 >= 0 and code[index - 1] not in [' ', '\n', '\r', '(']) or \
+                if (index - 1 >= 0 and index - 1 < len(code) and code[index - 1] not in [' ', '\n', '\r', '(']) or \
                     (index + 1 < len(code) and code[index + 1] in [' ', '\n', '\r']):
                     spacingData = {
                         'operator': code[index:index + 1],
