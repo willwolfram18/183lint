@@ -13,11 +13,14 @@ class StyleRubric(object):
     from clangStyleHelpers import _cursorNotInFile, _findOperators, _operatorSpacingCheckHelper
     SET_LIBRARY = True
 
-    def __init__(self):
+    def __init__(self, optionalConfig=None):
         # Prevent calling Config.set_library_path multiple times
         # which causes the rubric to crash
-        self.config = ConfigParser()
-        self.config.read('config.ini')
+        if (optionalConfig == None):
+            self.config = ConfigParser()
+            self.config.read('config.ini')
+        else:
+            self.config = optionalConfig
         if StyleRubric.SET_LIBRARY:
             Config.set_library_path(self.config.get('CLANG_LOCATION', 'path'))
             StyleRubric.SET_LIBRARY = False

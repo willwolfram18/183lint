@@ -9,7 +9,7 @@ from StyleGrader import StyleRubric
 from werkzeug import secure_filename
 
 config = ConfigParser()
-config.read('config.ini')
+config.read('/var/www/183lint/183lint/config.ini')
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -20,7 +20,7 @@ app.config['SECRET_KEY'] = ''
 # Google Info for Google Login
 app.config['GOOGLE_LOGIN_CLIENT_ID'] = ''
 app.config['GOOGLE_LOGIN_CLIENT_SECRET'] = ''
-app.config['GOOGLE_LOGIN_REDIRECT_URI'] = 'http://localhost:5000/oauth2callback'
+app.config['GOOGLE_LOGIN_REDIRECT_URI'] = 'http://style183.eecs.umich.edu/oauth2callback'
                                                                                 
 google = GoogleLogin(app)
 assets = Environment(app)
@@ -111,12 +111,13 @@ def gradeFiles():
             filename = os.path.join(pathname, filename)
             f.save(filename)
             savedFiles.append(filename)
-    
-    rubric = StyleRubric()
+            
+    rubric = StyleRubric(optionalConfig=config)
     for f in savedFiles:
         rubric.gradeFile(f)
 
-    return jsonify(rubric.generateReport())
+    finalReport = rubric.generateReport()
+    return jsonify(finalReport)
 
 
 # Functions for Logging in and out using Google
