@@ -1,6 +1,6 @@
 from clang.cindex import CursorKind
 from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
-        _evaluateBreakStatementsHelper
+        _evaluateBreakStatementsHelper, findStaticAndDynamicCasts
 
 def __dir__():
     return [evaluateOperatorSpacing, evaluateTernaryOperator, evaluateBreakStatements,
@@ -14,6 +14,7 @@ def evaluateOperatorSpacing(rubric, cursor):
 
     # Maintain which operators on the line have already been checked
     operatorLocationDict = {}
+    findStaticAndDynamicCasts(rubric, operatorLocationDict)
     for c in cursors:
         # Clang's line and column numbers are 1-indexed, need -1 for zero index
         lineNumber = c.location.line - 1
