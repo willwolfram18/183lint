@@ -10,10 +10,11 @@ def _cursorNotInFile(rubric, cursor):
 def _findOperators(rubric, cursor, operatorCursors):
         if rubric._cursorNotInFile(cursor):
             return
-        if isOperator(cursor):
-            operatorCursors.append(cursor)
+        # Treat traversal as post-order traversal
         for c in cursor.get_children():
             rubric._findOperators(c, operatorCursors)
+        if isOperator(cursor):
+            operatorCursors.append(cursor)
 
 def _operatorSpacingCheckHelper(rubric, code, line, index, isCompound):
     if not isSpacedCorrectly(code, index, isCompound):

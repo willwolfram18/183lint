@@ -1,5 +1,5 @@
 import unittest
-from StyleRubric import StyleRubric
+from StyleGrader import StyleRubric
 
 def assertionMessage(expected, found, errorList=[]):
     if expected == 0:
