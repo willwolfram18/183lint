@@ -136,8 +136,7 @@ def findStaticAndDynamicCasts(rubric, operatorLocationDict):
         index = findOperatorStart(code, c.location.column - 1)
         while index in operatorLocationDict[lineNumber] and index < len(code):
             index = findOperatorStart(code, index + 1)
-        if index < len(code):
-            assert code[index] == '<'
+        if index < len(code) and code[index] == '<':
             # Add the opening angle bracket of static cast
             operatorLocationDict[lineNumber].add(index)
             index = findOperatorStart(code, index + 1)
