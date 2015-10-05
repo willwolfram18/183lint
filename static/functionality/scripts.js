@@ -154,8 +154,8 @@ $(function() {
 		errorDiv.html("The style grader encountered an error. Please " +
 			      "create a new issue on the GitHub repository " +
 			      "<a href=\"https://github.com/TheWolfA2/183lint/issues\">here</a>" +
-			      " and attach the file(s) that were submitted when " +
-			      " the error occurred.");
+			      " and email the file(s) that were submitted when " +
+			      " the error occurred to <a href='mailto:183lint.staff@umich.edu'>183lint.staff@umich.edu</a>. Please include the GitHub issue number in your email subject or body.");
 		$("#results").append(errorDiv);
 		$("#results").toggleClass("hidden");
 		clearButtons();		
