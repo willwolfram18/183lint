@@ -105,7 +105,7 @@ def gradeFiles():
     for f in receivedFiles:
         filename = secure_filename(f.filename)
         if filename != '':
-            pathname = os.path.join(app.config['UPLOAD_FOLDER'], session['USER_ID'])
+            pathname = os.path.join(app.config['UPLOAD_FOLDER'], session['USERNAME'].replace(' ', '_') + '_' + session['USER_ID'])
             if not os.path.exists(pathname):
                 mkdir(pathname)
             filename = os.path.join(pathname, filename)
