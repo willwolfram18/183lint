@@ -181,6 +181,6 @@ def cleanStringsAndChars(code):
     return code, firstReplace
 
 def lineBeginsWithSpaces(code):
-        startsWithSpace = re.compile('^ *')
-        startsWithTab = re.compile('^\t+')
-        return not startsWithTab.match(code) and startsWithSpace.match(code)
+    startsWithSpace = re.compile('^ *')
+    startsWithTab = re.compile('^\t+')
+    return not startsWithTab.match(code) and startsWithSpace.match(code)
