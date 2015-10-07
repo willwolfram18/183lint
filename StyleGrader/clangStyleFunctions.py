@@ -19,14 +19,21 @@ def evaluateOperatorSpacing(rubric, cursor):
         # Clang's line and column numbers are 1-indexed, need -1 for zero index
         lineNumber = c.location.line - 1
         code = rubric._cleanLines.lines[lineNumber]
-        code = cleanStringsAndChars(code)
+        columnLenDiff = len(code)
+        code, colDeleteLocation = cleanStringsAndChars(code)
+        # Removed characters from the line, causes column to shift
+        # Didn't make any deletions or shift is after the current column
+        if colDeleteLocation == -1 or colDeleteLocation > c.location.column - 1:
+            columnLenDiff = 0
+        else:
+            columnLenDiff = columnLenDiff - len(code)
 
         # Create the set if we haven't already
         if lineNumber not in operatorLocationDict:
             operatorLocationDict[lineNumber] = set()
 
         # Keep looking for an operator until we've found one not in the set
-        index = findOperatorStart(code, c.location.column - 1)
+        index = findOperatorStart(code, c.location.column - 1 - columnLenDiff)
         while index in operatorLocationDict[lineNumber] and index < len(code):
             index = findOperatorStart(code, index + 1)
         if index < len(code):

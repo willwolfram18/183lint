@@ -148,16 +148,34 @@ def findStaticAndDynamicCasts(rubric, operatorLocationDict):
                 operatorLocationDict[lineNumber].add(index)
 
 def cleanStringsAndChars(code):
+    '''
+    :type code: str
+    :return:
+    '''
     charPattern = re.compile("'.+?'", re.DOTALL)
     stringPattern = re.compile('".+?"', re.DOTALL)
 
+    # Store location of first erase, use later to see if
+    # column has shifted
+    findIndex = None
+    firstReplace = code.find("\\'")
     code = code.replace("\\'", '')
     results = charPattern.findall(code)
     for match in results:
+        findIndex = code.find(match)
+        if firstReplace == -1 or findIndex < firstReplace:
+            firstReplace = findIndex
         code = code.replace(match, "''")
 
+    findIndex = code.find('\\"')
+    if firstReplace == -1 or\
+        (findIndex != -1 and findIndex < firstReplace):
+        firstReplace = findIndex
     code = code.replace('\\"', '')
     results = stringPattern.findall(code)
     for match in results:
+        findIndex = code.find(match)
+        if firstReplace == -1 or findIndex < firstReplace:
+            firstReplace = findIndex
         code = code.replace(match, '""')
-    return code
+    return code, firstReplace
