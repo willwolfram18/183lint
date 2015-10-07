@@ -179,3 +179,8 @@ def cleanStringsAndChars(code):
             firstReplace = findIndex
         code = code.replace(match, '""')
     return code, firstReplace
+
+def lineBeginsWithSpaces(code):
+        startsWithSpace = re.compile('^ *')
+        startsWithTab = re.compile('^\t+')
+        return not startsWithTab.match(code) and startsWithSpace.match(code)
