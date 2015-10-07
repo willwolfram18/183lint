@@ -4,6 +4,7 @@ using namespace std;
 
 int main() {
     int x = 0;
+    x = 2;
     // check compound operators
     x       += 1;
     x -= 1;
@@ -45,7 +46,8 @@ int main() {
     x += x - 1;
     x && true == x || false;
 
-    cout << "hello world" << endl << x;
+    cout << "hello world" 
+         << endl << x;
     cin >> x >> x;
 
     return 0;

@@ -1,4 +1,5 @@
 from clang.cindex import CursorKind
+import re
 
 '''
 Helper functions for the StyleRubric class
@@ -146,4 +147,17 @@ def findStaticAndDynamicCasts(rubric, operatorLocationDict):
                 assert code[index] == '>'
                 operatorLocationDict[lineNumber].add(index)
 
+def cleanStringsAndChars(code):
+    charPattern = re.compile("'.+?'", re.DOTALL)
+    stringPattern = re.compile('".+?"', re.DOTALL)
 
+    code = code.replace("\\'", '')
+    results = charPattern.findall(code)
+    for match in results:
+        code = code.replace(match, "''")
+
+    code = code.replace('\\"', '')
+    results = stringPattern.findall(code)
+    for match in results:
+        code = code.replace(match, '""')
+    return code
