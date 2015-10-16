@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 using namespace std;
 
 int main() {
@@ -9,4 +10,5 @@ int main() {
     }
     string s = "Hello + star";
     s == "\"Hello+star\"'\'\"" || true;
+    cout << "Choice is: " << choice << endl;
 }

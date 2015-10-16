@@ -1,11 +1,13 @@
 from clang.cindex import CursorKind
 from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
-        _evaluateBreakStatementsHelper, findStaticAndDynamicCasts, cleanStringsAndChars
+        _evaluateBreakStatementsHelper, findStaticAndDynamicCasts, cleanStringsAndChars, \
+        lineBeginsWithSpaces
 
 def __dir__():
     return [evaluateOperatorSpacing, evaluateTernaryOperator, evaluateBreakStatements,
             evaluateContinueStatements, evaluateGotoStatments, evaluateWhileTrue,
-            evaluateBoolLiteralComparison, evaluateLineLength, evaluateLibraries]
+            evaluateBoolLiteralComparison, evaluateLineLength, evaluateLibraries,
+            evaluateUseOfTabs]
 
 def evaluateOperatorSpacing(rubric, cursor):
     # Find all of the operators
@@ -158,3 +160,8 @@ def evaluateLibraries(rubric, cursor):
         if (libName == 'stdlib.h' or libName == 'cstdlib') and not rubric._stdLib:
             rubric._stdLib = True
 
+def evaluateUseOfTabs(rubric, cursor):
+    for line in rubric._cleanLines.lines:
+        if not lineBeginsWithSpaces(line):
+            rubric._addError('USING_TABS', 0, 0)
+            break

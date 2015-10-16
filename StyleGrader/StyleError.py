@@ -14,11 +14,11 @@ class StyleError(object):
     def __init__(self, lineNum=0, colNum=0, points=0, label='ERROR', data={}):
         """
         Log the line number, type and point value of a specific error.
-        points (int): Weight of this error.
-        label (str): Key for response lookup in list_of_errors.
-        line_num (int): Line number of this error.
-        column_num (int): Column number of this error.
-        data (dictionary): Additional information about the error,
+        :type points: int Weight of this error.
+        :type label: str Key for response lookup in list_of_errors.
+        :type line_num: int Line number of this error.
+        :type column_num: int Column number of this error.
+        :type data: dict Additional information about the error,
         """
         self.lineNum = lineNum
         self.colNum = colNum
@@ -58,6 +58,7 @@ class StyleError(object):
             'EXIT': 'Do not use exit()',
             'CONTINUE': 'Do not use continue',
             'BANNED_INCLUDE': 'You have included {0}, a library that we have prohibited.'.format(self.data.get("library")),
+            'USING_TABS': 'One or more lines of code begins with the tab character. Please convert all lines to start with spaces.',
         }
         if self.label in messages:
             self.message = messages[self.label]
