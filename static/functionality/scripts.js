@@ -95,48 +95,10 @@ $(function() {
     function hideSpinner() {
         $spinner.stop();
     }
-    function createCollapsePanel(fileName, report, errorFree) {
-        var $panel = createElement('div', 'panel panel-default'),
-            $heading = createElement('div', 'panel-heading'),
-            $headingText = createElement('a'),
-            $headingTitle = createElement('h4', 'panel-title'),
-            $collapse = createElement('div', 'panel-collapse collapse'),
-            $content = createElement('div', 'panel-body');
-
-        if (errorFree) {
-            $heading.toggleClass('errorFree');
-        }
-
-        $headingText.text(fileName).attr('data-toggle', 'collapse')
-                    .attr('href', '#' + fileName.replace('.', '_'))
-                    .attr('data-parent', '#results');
-        $headingTitle.append($headingText);
-        $heading.append($headingTitle);
-
-        $content.html(report);
-        $collapse.attr('id', fileName.replace('.', '_')).append($content); 
-
-        $panel.append($collapse).prepend($heading);
-        $('#results').append($panel);
-    }
     function handler_parseResponse(data) {
         console.log('Success!');
         clearButtons();
-        $('#results').removeClass('hidden');
-        for (key in data) {
-            var report = '';
-            if (data[key].length == 0) {
-                report = "No errors found! :D"
-            } else {
-                for (var i = 0; i < data[key].length; i++) {
-                    report += data[key][i]
-                    if (i != data[key].length - 1) {
-                        report += '<br>';
-                    }
-                }
-            }
-            createCollapsePanel(key, report, data[key].length == 0);
-        }
+        $('#results').removeClass('hidden').html(data);
     }
     function handler_uploadFiles() {
         var formData = new FormData($('#input-files')[0]);
@@ -150,15 +112,15 @@ $(function() {
             success: handler_parseResponse,
             error: function() {
                 console.log('Error!');
-		var errorDiv = createElement("div", "server-error-msg");
-		errorDiv.html("The style grader encountered an error. Please " +
-			      "create a new issue on the GitHub repository " +
-			      "<a href=\"https://github.com/TheWolfA2/183lint/issues\">here</a>" +
-			      " and email the file(s) that were submitted when " +
-			      " the error occurred to <a href='mailto:183lint.staff@umich.edu'>183lint.staff@umich.edu</a>. Please include the GitHub issue number in your email subject or body.");
-		$("#results").append(errorDiv);
-		$("#results").toggleClass("hidden");
-		clearButtons();		
+        		var errorDiv = createElement("div", "server-error-msg");
+        		errorDiv.html("The style grader encountered an error. Please " +
+        			      "create a new issue on the GitHub repository " +
+        			      "<a href=\"https://github.com/TheWolfA2/183lint/issues\">here</a>" +
+        			      " and email the file(s) that were submitted when " +
+        			      " the error occurred to <a href='mailto:183lint.staff@umich.edu'>183lint.staff@umich.edu</a>. Please include the GitHub issue number in your email subject or body.");
+        		$("#results").append(errorDiv);
+        		$("#results").toggleClass("hidden");
+        		clearButtons();		
                 hideSpinner();
             },
             complete: hideSpinner,

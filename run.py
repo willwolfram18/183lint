@@ -1,6 +1,6 @@
 from ConfigParser import ConfigParser
 from functools import wraps
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask import Flask, render_template, request, redirect, session, url_for
 from flask.ext.assets import Environment, Bundle
 from flask_googlelogin import GoogleLogin
 from os import mkdir
@@ -9,7 +9,7 @@ from StyleGrader import StyleRubric
 from werkzeug import secure_filename
 
 config = ConfigParser()
-config.read('/var/www/183lint/183lint/config.ini')
+config.read('config.ini')
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -117,7 +117,16 @@ def gradeFiles():
         rubric.gradeFile(f)
 
     finalReport = rubric.generateReport()
-    return jsonify(finalReport)
+    gradedFiles = {
+        'correct': [],
+        'incorrect': [],
+    }
+    for f in finalReport:
+        dictKey = 'incorrect'
+        if len(finalReport[f]) == 0:
+            dictKey = 'correct'
+        gradedFiles[dictKey].append({'filename': f, 'errors': finalReport[f]})
+    return render_template('grade.html', files=gradedFiles)
 
 
 # Functions for Logging in and out using Google

@@ -1,0 +1,51 @@
+<div id="incorrectFiles" class="panel panel-default">
+    <div class="panel-heading">
+        <a data-toggle="collapse" data-target="#incorrectFilesBody">
+            Files with errors
+        </a>
+    </div>
+    <div id="incorrectFilesBody" class="panel-collapse collapse in">
+        <div class="panel-body">
+            {% if files['incorrect']|length == 0 %}
+                No errors were found in the files submitted!
+            {% else %}
+                {% for fileObj in files['incorrect'] %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <a data-toggle="collapse" data-target="#{{ fileObj['filename']|replace('.','_') }}_body">
+                                {{ fileObj['filename'] }}
+                            </a>
+                        </div>
+                        <div id="{{ fileObj['filename']|replace('.','_')}}_body" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <ul>
+                                    {% for error in fileObj['errors'] %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% if files['correct']|length > 0 %}
+    <div id="correctFiles" class="panel panel-default">
+        <div class="panel-heading errorFree">
+            <a data-toggle="collapse" data-target="#correctFilesBody">
+                Error free files
+            </a>
+        </div>
+        <div id="correctFilesBody" class="panel-collapse collapse">
+            <div class="panel-body">
+                <ul>
+                    {% for fileObj in files['correct'] %}
+                        <li>{{ fileObj['filename'] }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endif %}

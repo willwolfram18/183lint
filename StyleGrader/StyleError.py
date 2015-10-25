@@ -58,7 +58,7 @@ class StyleError(object):
             'EXIT': 'Do not use exit()',
             'CONTINUE': 'Do not use continue',
             'BANNED_INCLUDE': 'You have included {0}, a library that we have prohibited.'.format(self.data.get("library")),
-            'USING_TABS': 'One or more lines of code begins with the tab character. Please convert all lines to start with spaces.',
+            'USING_TABS': 'One or more lines of code begins with tabs. Please start all lines with spaces.',
         }
         if self.label in messages:
             self.message = messages[self.label]
