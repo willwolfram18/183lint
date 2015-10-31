@@ -4,20 +4,18 @@ import re
 '''
 Helper functions for the StyleRubric class
 '''
-def _cursorNotInFile(rubric, cursor):
-        return cursor.location.file and \
-               cursor.location.file.name != rubric._currentFilename
-
-def _findOperators(rubric, cursor, operatorCursors):
-        if rubric._cursorNotInFile(cursor):
-            return
-        # Treat traversal as post-order traversal
-        for c in cursor.get_children():
-            rubric._findOperators(c, operatorCursors)
-        if isOperator(cursor):
-            operatorCursors.append(cursor)
 
 def _operatorSpacingCheckHelper(rubric, code, line, index, isCompound):
+    '''
+    Checks to see if the operator located at the given index is spaced
+    correctly, and if it is not adds an operator spacing error to the
+    style rubric
+    :type rubric: StyleRubric
+    :type code: str
+    :type line: int
+    :type index: int
+    :type isCompound: bool
+    '''
     if not isSpacedCorrectly(code, index, isCompound):
         spacingData = {
             'operator': code[index:index + 2] if isCompound else code[index:index + 1]
@@ -56,21 +54,26 @@ General helper functions
 '''
 def isOperator(cursor):
     '''
+    Checks to see if the provided cursor is an operator cursor. Returns true if the
+    cursor's kind is BINARY_OPERATOR, COMPOUND_ASSIGNMENT_OPERATOR, UNARY_OPERATOR,
+    or is a function overload for a C++ class
     :type cursor: clang.cindex.Cursor
-    :returns True iff cursor is a Binary, Compound Assignement, Unary, or output/input
-             operator, False otherwise
+    :returns bool
     '''
     return cursor.kind == CursorKind.BINARY_OPERATOR or \
             cursor.kind == CursorKind.COMPOUND_ASSIGNMENT_OPERATOR or \
             cursor.kind == CursorKind.UNARY_OPERATOR or \
-            ((cursor.displayname == 'operator<<' or cursor.displayname == 'operator>>') and \
-               cursor.kind == CursorKind.UNEXPOSED_EXPR)
+           ('operator' in cursor.displayname and cursor.kind == CursorKind.UNEXPOSED_EXPR)
+            # ((cursor.displayname == 'operator<<' or cursor.displayname == 'operator>>') and \
+            #    cursor.kind == CursorKind.UNEXPOSED_EXPR)
 
 def findOperatorStart(code, start):
     '''
-    :type code: string
+    Finds the index of the first operator encountered in code in the range
+    [start, len(code)). If no operator is found, returns the len(code)
+    :type code: str
     :type start: number
-    :returns the index of the first operator encountered in code in the range [start, len(code))
+    :returns int
     '''
     index = start
     while index < len(code) and code[index] not in '+=-*/%!><&|':
@@ -79,34 +82,40 @@ def findOperatorStart(code, start):
 
 def isCompoundBinaryOperator(code, column):
     '''
-    :type code: string
-    :type column: number
-    :returns True iff code[column:column + 2] is a a logical comparison operator
-             (greater than equals, does not equal, logical AND, etc.), False otherwise
+    Checks to see if the operator located at column is a two-character operator (e.g.
+    ==, !=, >=, etc.)
+    :type code: str
+    :type column: int
+    :returns bool
     '''
-    return code[column:column + 2] in ['!=', '==', '<=', '>=', '&&', '||']
+    return code[column:column + 2] in ['!=', '==', '<=', '>=', '&&', '||', '->']
 
 def isSpacedCorrectly(code, index, isCompound):
     '''
+    Checks to see if the operator has the appropriate white space characters preceding
+    and following it
     :type code: str
     :type index: int
     :type isCompound: bool
     :return: bool
     '''
+    allowedSurroundingChars = [' ', '\n', '\r']
     postOffset = 2 if isCompound else 1
     # Checking spacing in front of operator
-    if index - 1 >= 0 and index - 1 < len(code) and code[index - 1] not in [' ', '\n', '\r']:
+    if index - 1 >= 0 and index - 1 < len(code) and code[index - 1] not in allowedSurroundingChars:
         return False
     # Check spacing following operator
-    elif index + postOffset < len(code) and code[index + postOffset] not in [' ', '\n', '\r']:
+    elif index + postOffset < len(code) and code[index + postOffset] not in allowedSurroundingChars:
         return False
     return  True
 
 def _findStaticAndDynamixCastsHelper(rubric, cursor, cursors):
     '''
+    Looks through the Clang AST, placing any static or dynamic cast cursors into
+    the cursors list
     :type rubric: StyleRubric
     :type cursor: clang.cindex.Cursor
-    :type cursors: list
+    :type cursors: list[clang.cindex.Cursor]
     '''
     if rubric._cursorNotInFile(cursor):
         return
@@ -120,8 +129,12 @@ def _findStaticAndDynamixCastsHelper(rubric, cursor, cursors):
 
 def findStaticAndDynamicCasts(rubric, operatorLocationDict):
     '''
+    Gathers all static and dynamic cast cursors in the file, and checks to see
+    if they follow the C++ style casts (e.g. static_cast<type_t>(operand)), and adds
+    the angle brackets to the operatorLocationDict to prevent them being treated
+    as operators
     :type rubric: StyleRubric
-    :type operatorLocationDict: dict[int, set]
+    :type operatorLocationDict: dict[int, set[int]]
     '''
     castCursors = []
     _findStaticAndDynamixCastsHelper(rubric, rubric._clangCursor, castCursors)
@@ -129,7 +142,7 @@ def findStaticAndDynamicCasts(rubric, operatorLocationDict):
     for c in castCursors:
         # Clang does line and column indexing by 1
         lineNumber = c.location.line - 1
-        code = rubric._cleanLines.lines[lineNumber]
+        code = rubric.getLineOfCode(lineNumber)
 
         if lineNumber not in operatorLocationDict:
             operatorLocationDict[lineNumber] = set()
@@ -149,8 +162,10 @@ def findStaticAndDynamicCasts(rubric, operatorLocationDict):
 
 def cleanStringsAndChars(code):
     '''
+    Cleans the provided string of any literal characters and strings. For example,
+    converts the line "Hello world!"; to "";
     :type code: str
-    :return:
+    :return: str,int
     '''
     charPattern = re.compile("'.+?'", re.DOTALL)
     stringPattern = re.compile('".+?"', re.DOTALL)
@@ -181,6 +196,51 @@ def cleanStringsAndChars(code):
     return code, firstReplace
 
 def lineBeginsWithSpaces(code):
+    '''
+    Checks to see if the provided string starts with 0 or more spaces and doesn't
+    start with tabs.
+    :type code: str
+    :return: bool
+    '''
     startsWithSpace = re.compile('^ *')
     startsWithTab = re.compile('^\t+')
     return not startsWithTab.match(code) and startsWithSpace.match(code)
+
+def checkOperatorOverload(rubric, cursor, code, index, lineNum, operatorLocationDict):
+    '''
+
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    :type code: string
+    :type index: int
+    :type lineNum: int
+    :type operatorLocationDict: dict[int, set[int]]
+    :return:
+    '''
+    unaryVal = [
+        re.compile('.+ \(\*\)\(\)'), # matches type_t (*)() member func
+        re.compile('.+ \(\*\)\(.\)') # matches type_t (*)(type_t) friend func
+    ]
+    binaryVal = [
+        re.compile('.+ \(\*\)\(.+\, .+\)'), # matches type_t (*)(type_x, type_y)
+    ]
+    ignoredOperators = ['++', '--', '->', '->*', '()', '[]']
+    operator = cursor.displayname.replace('operator', '')
+    if operator in ignoredOperators:
+        return
+
+    # Binary operators that take up two spaces
+    binaryTwoSpace = ['+=', '-=', '*=', '/=', '%=', '^=', '&=', '|=', '>>', '<<',
+                      '==', '!=', '<=', '>=', '&&', '||']
+    if operator in binaryTwoSpace:
+        operatorLocationDict[lineNum].add(index + 1)
+        rubric._operatorSpacingCheckHelper(code, lineNum, index, True)
+    elif operator in ['>>=', '<<=']:
+        operatorLocationDict[lineNum].add(index + 1)
+        operatorLocationDict[lineNum].add(index + 2)
+        if (index - 1 >= 0 and code[index - 1] not in ['\n', '\r', ' ']) or \
+                (index + 3 < len(code) and code[index + 3] not in ['\n', '\r', ' ']):
+            spacingData = {
+                'operator': code[index:index+3]
+            }
+            rubric._addError('OPERATOR_SPACING', lineNum + 1, index + 1, spacingData)

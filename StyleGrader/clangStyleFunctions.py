@@ -10,6 +10,12 @@ def __dir__():
             evaluateUseOfTabs]
 
 def evaluateOperatorSpacing(rubric, cursor):
+    '''
+
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    :return:
+    '''
     # Find all of the operators
     cursors = []
     rubric._findOperators(rubric._clangCursor, cursors)
@@ -20,7 +26,7 @@ def evaluateOperatorSpacing(rubric, cursor):
     for c in cursors:
         # Clang's line and column numbers are 1-indexed, need -1 for zero index
         lineNumber = c.location.line - 1
-        code = rubric._cleanLines.lines[lineNumber]
+        code = rubric.getLineOfCode(lineNumber)
         columnLenDiff = len(code)
         code, colDeleteLocation = cleanStringsAndChars(code)
         # Removed characters from the line, causes column to shift
@@ -43,7 +49,18 @@ def evaluateOperatorSpacing(rubric, cursor):
 
             if c.kind == CursorKind.COMPOUND_ASSIGNMENT_OPERATOR:
                 operatorLocationDict[lineNumber].add(index + 1) # Operator spans 2 locations, add the second part of the operator
-                rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
+
+                # handle special case where using binary shift assignment
+                if index + 2 < len(code) and code[index:index+3] in ['<<=', '>>=']:
+                    operatorLocationDict[lineNumber].add(index + 3)
+                    if (index - 1 >= 0 and code[index - 1] not in ['\n', '\r', ' ']) or \
+                        (index + 3 < len(code) and code[index + 3] not in ['\n', '\r', ' ']):
+                        spacingData = {
+                            'operator': code[index:index+3]
+                        }
+                        rubric._addError('OPERATOR_SPACING', lineNumber + 1, index + 1, spacingData)
+                else:
+                    rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
             elif c.kind == CursorKind.BINARY_OPERATOR:
                 if isCompoundBinaryOperator(code, index):
                     operatorLocationDict[lineNumber].add(index + 1) # Operator spans 2 locations, add the second part of the operator
@@ -62,9 +79,11 @@ def evaluateOperatorSpacing(rubric, cursor):
                             'operator': code[index:index + 1],
                         }
                         rubric._addError('UNARY_OPERATOR_SPACING', lineNumber + 1, index + 1, spacingData)
-            else: # operator>> and operator<<
-                operatorLocationDict[lineNumber].add(index + 1)
-                rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
+            else: # operator overload functions
+                isCompound = len(c.displayname.replace('operator', '')) == 2
+                if isCompound:
+                    operatorLocationDict[lineNumber].add(index + 1)
+                rubric._operatorSpacingCheckHelper(code, lineNumber, index, isCompound)
 
 def evaluateTernaryOperator(rubric, cursor):
     if rubric._cursorNotInFile(cursor):
@@ -120,7 +139,7 @@ def evaluateBoolLiteralComparison(rubric, cursor):
         return
     if cursor.kind == CursorKind.BINARY_OPERATOR:
         # cursor lines are 1 indexed, need -1 for correct array offset
-        code = rubric._cleanLines.lines[cursor.location.line - 1]
+        code = rubric.getLineOfCode(cursor.location.line - 1)
         index = findOperatorStart(code, cursor.location.column)
         if code[index:index+2] in ['==', '!=']:
             # Evaluate the children of the operator
@@ -161,7 +180,7 @@ def evaluateLibraries(rubric, cursor):
             rubric._stdLib = True
 
 def evaluateUseOfTabs(rubric, cursor):
-    for line in rubric._cleanLines.lines:
+    for line in rubric.getCode():
         if not lineBeginsWithSpaces(line):
             rubric._addError('USING_TABS', 0, 0)
             break

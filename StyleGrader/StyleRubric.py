@@ -1,5 +1,6 @@
 from clang.cindex import Config, CursorKind, Index, TranslationUnitLoadError
 import clangStyleFunctions
+from clangStyleHelpers import isOperator
 import codecs
 from ConfigParser import ConfigParser
 from cpplint import CleansedLines, RemoveMultiLineComments
@@ -10,7 +11,7 @@ import sys
 
 class StyleRubric(object):
     # Import helper functions
-    from clangStyleHelpers import _cursorNotInFile, _findOperators, _operatorSpacingCheckHelper
+    from clangStyleHelpers import _operatorSpacingCheckHelper
     SET_LIBRARY = True
 
     def __init__(self, optionalConfig=None):
@@ -76,12 +77,55 @@ class StyleRubric(object):
         self._errorTypes[label] += 1
         self._fileErrors[self._currentFilename].append(StyleError(line, column, 0, label, data))
 
+    def _cursorNotInFile(self, cursor):
+        '''
+        Returns true if the provided cursor is in the rubric's
+        current file, false otherwise
+        :type cursor: clang.cindex.Cursor
+        :return:
+        '''
+        return cursor.location.file and \
+               cursor.location.file.name != self._currentFilename
+
+    def _findOperators(self, cursor, operatorCursors):
+        '''
+        Collects any operator cursors encountered in the Clang AST
+        and appends them to operatorCursors in a post-order traversal
+        :type cursor: clang.cindex.Cursor
+        :type operatorCursors: list[clang.cindex.Cursor]
+        '''
+        if self._cursorNotInFile(cursor):
+            return
+        # Treat AST traversal as post-order
+        for c in cursor.get_children():
+            self._findOperators(c, operatorCursors)
+        if isOperator(cursor):
+            operatorCursors.append(cursor)
+
+    def getCode(self):
+        '''
+        Gets the entire list of the lines of code for the current file
+        :return: list[str]
+        '''
+        return self._cleanLines.lines
+
+    def getLineOfCode(self, lineNumber):
+        '''
+        Gets the line of code at lineNumber. If lineNumber is an invalid index,
+        returns None
+        :type lineNumber: int
+        :return: str
+        '''
+        if lineNumber < 0 or lineNumber > len(self._cleanLines.lines):
+            return None
+        return self._cleanLines.lines[lineNumber]
+
     def gradeFile(self, filename):
         self._resetForNextFile()
-        assert self._translationUnit == None
-        assert self._clangCursor == None
-        assert self._currentFilename == None
-        assert self._cleanLines == None
+        assert self._translationUnit is None
+        assert self._clangCursor is None
+        assert self._currentFilename is None
+        assert self._cleanLines is None
 
         self._currentFilename = filename
         self._fileErrors[self._currentFilename] = []
@@ -94,7 +138,7 @@ class StyleRubric(object):
             return
 
         data = self._safelyOpenFile()
-        if data == None:
+        if data is None:
             return
 
         RemoveMultiLineComments(filename, data, '')
