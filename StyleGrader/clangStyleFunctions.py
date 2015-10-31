@@ -1,6 +1,6 @@
 from clang.cindex import CursorKind
 from clangStyleHelpers import findOperatorStart, isCompoundBinaryOperator, \
-        _evaluateBreakStatementsHelper, findStaticAndDynamicCasts, cleanStringsAndChars, \
+        evaluateBreakStatementsHelper, findStaticAndDynamicCasts, cleanStringsAndChars, \
         lineBeginsWithSpaces
 
 def __dir__():
@@ -11,7 +11,8 @@ def __dir__():
 
 def evaluateOperatorSpacing(rubric, cursor):
     '''
-
+    Adds an error to the style rubric for each cursor in the AST that references an
+    operator and is improperly spaced
     :type rubric: StyleRubric
     :type cursor: clang.cindex.Cursor
     :return:
@@ -60,13 +61,13 @@ def evaluateOperatorSpacing(rubric, cursor):
                         }
                         rubric._addError('OPERATOR_SPACING', lineNumber + 1, index + 1, spacingData)
                 else:
-                    rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
+                    rubric.checkOperatorSpacing(code, lineNumber, index, True)
             elif c.kind == CursorKind.BINARY_OPERATOR:
                 if isCompoundBinaryOperator(code, index):
                     operatorLocationDict[lineNumber].add(index + 1) # Operator spans 2 locations, add the second part of the operator
-                    rubric._operatorSpacingCheckHelper(code, lineNumber, index, True)
+                    rubric.checkOperatorSpacing(code, lineNumber, index, True)
                 else:
-                    rubric._operatorSpacingCheckHelper(code, lineNumber, index, False)
+                    rubric.checkOperatorSpacing(code, lineNumber, index, False)
             elif c.kind == CursorKind.UNARY_OPERATOR:
                 if index + 1 < len(code) and code[index] == code[index + 1]:
                     # No rules for the ++ and -- operators, just skip it
@@ -83,9 +84,16 @@ def evaluateOperatorSpacing(rubric, cursor):
                 isCompound = len(c.displayname.replace('operator', '')) == 2
                 if isCompound:
                     operatorLocationDict[lineNumber].add(index + 1)
-                rubric._operatorSpacingCheckHelper(code, lineNumber, index, isCompound)
+                rubric.checkOperatorSpacing(code, lineNumber, index, isCompound)
 
 def evaluateTernaryOperator(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each cursor in the AST that is a
+    ternary operator
+    :type rubric: StyleRubric
+    :type cursor:
+    :return:
+    '''
     if rubric._cursorNotInFile(cursor):
         return
     if cursor.kind == CursorKind.CONDITIONAL_OPERATOR:
@@ -94,10 +102,21 @@ def evaluateTernaryOperator(rubric, cursor):
         evaluateTernaryOperator(rubric, c)
 
 def evaluateBreakStatements(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each cursor in the AST that is a break
+    statement outside of a switch statement
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    '''
     scopeStack = []
-    _evaluateBreakStatementsHelper(rubric, cursor, scopeStack)
+    evaluateBreakStatementsHelper(rubric, cursor, scopeStack)
 
 def evaluateContinueStatements(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each cursor in the AST that is a Continue statement
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    '''
     if rubric._cursorNotInFile(cursor):
         return
     if cursor.kind == CursorKind.CONTINUE_STMT:
@@ -106,6 +125,11 @@ def evaluateContinueStatements(rubric, cursor):
         evaluateContinueStatements(rubric, c)
 
 def evaluateGotoStatments(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each cursor in the AST that is a goto statement
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    '''
     if rubric._cursorNotInFile(cursor):
         return
     if cursor.kind == CursorKind.GOTO_STMT:
@@ -114,6 +138,12 @@ def evaluateGotoStatments(rubric, cursor):
         evaluateGotoStatments(rubric, c)
 
 def evaluateWhileTrue(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each cursor in the AST that is a continuous
+    loop structure (while(true) or while(!false) for example)
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    '''
     if rubric._cursorNotInFile(cursor):
         return
     if cursor.kind == CursorKind.DO_STMT or cursor.kind == CursorKind.WHILE_STMT:
@@ -135,6 +165,13 @@ def evaluateWhileTrue(rubric, cursor):
         evaluateWhileTrue(rubric, c)
 
 def evaluateBoolLiteralComparison(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each cursor in the AST that is pointing
+    to an operator that is making a direct comparison to a bool literal (x == true
+    for example)
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    '''
     if rubric._cursorNotInFile(cursor):
         return
     if cursor.kind == CursorKind.BINARY_OPERATOR:
@@ -155,8 +192,16 @@ def evaluateBoolLiteralComparison(rubric, cursor):
         evaluateBoolLiteralComparison(rubric, c)
 
 def evaluateLineLength(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each line of code that is longer than
+    the rubric's max line length
+    :type rubric:
+    :type cursor:
+    '''
+    # Use safelyOpenFile because we want to look for lines with comments
+    # included for line length
     data = rubric._safelyOpenFile()
-    if data == None: 
+    if data is None:
         return
     lineNum = 0
     for line in data:
@@ -170,6 +215,12 @@ def evaluateLineLength(rubric, cursor):
             rubric._addError('LINE_LENGTH', lineNum, rubric._maxLineLength + 1)
 
 def evaluateLibraries(rubric, cursor):
+    '''
+    Adds an error to the style rubric for each library that is included in the current
+    file that is part of the rubric's prohibited libraries
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    '''
     for lib in rubric._translationUnit.get_includes():
         # Library name is last part of file name path
         libName = lib.location.file.name.split('/')[-1]
@@ -180,6 +231,12 @@ def evaluateLibraries(rubric, cursor):
             rubric._stdLib = True
 
 def evaluateUseOfTabs(rubric, cursor):
+    '''
+    Adds an error to the style rubric if any line in the current file starts
+    with tabs instead of 0 or more spaces
+    :type rubric: StyleRubric
+    :type cursor: clang.cindex.Cursor
+    '''
     for line in rubric.getCode():
         if not lineBeginsWithSpaces(line):
             rubric._addError('USING_TABS', 0, 0)

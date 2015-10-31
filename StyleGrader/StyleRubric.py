@@ -1,6 +1,6 @@
 from clang.cindex import Config, CursorKind, Index, TranslationUnitLoadError
 import clangStyleFunctions
-from clangStyleHelpers import isOperator
+from clangStyleHelpers import isOperator, isSpacedCorrectly
 import codecs
 from ConfigParser import ConfigParser
 from cpplint import CleansedLines, RemoveMultiLineComments
@@ -10,8 +10,6 @@ import sys
 
 
 class StyleRubric(object):
-    # Import helper functions
-    from clangStyleHelpers import _operatorSpacingCheckHelper
     SET_LIBRARY = True
 
     def __init__(self, optionalConfig=None):
@@ -30,7 +28,7 @@ class StyleRubric(object):
     def resetRubric(self):
         # 'Global' state -- SHOULD NOT BE MODIFIED AFTER INIT
         self._clangIndex = Index.create()
-        self._styleFunctions = self._loadFunctions()
+        self._styleFunctions = self._loadStyleChecks()
 
         # Tracking for all files
         self._fileErrors = {}
@@ -48,7 +46,7 @@ class StyleRubric(object):
         self._foundLibs = []
         self._stdLib = False
 
-    def _loadFunctions(self):
+    def _loadStyleChecks(self):
         return clangStyleFunctions.__dir__()
 
     def _safelyOpenFile(self):
@@ -101,6 +99,23 @@ class StyleRubric(object):
             self._findOperators(c, operatorCursors)
         if isOperator(cursor):
             operatorCursors.append(cursor)
+
+    def checkOperatorSpacing(self, code, line, index, isCompound):
+        '''
+        Checks to see if the operator located at the given index is spaced
+        correctly, and if it is not adds an operator spacing error to the
+        style rubric
+        :type code: str
+        :type line: int
+        :type index: int
+        :type isCompound: bool
+        '''
+        if isSpacedCorrectly(code, index, isCompound):
+            indexOffset = 2 if isCompound else 1
+            spacingData = {
+                'operator': code[index:index + indexOffset]
+            }
+            self._addError("OPERATOR_SPACING", line + 1, index + 1, spacingData)
 
     def getCode(self):
         '''

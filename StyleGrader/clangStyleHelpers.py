@@ -1,32 +1,14 @@
 from clang.cindex import CursorKind
 import re
 
-'''
-Helper functions for the StyleRubric class
-'''
-
-def _operatorSpacingCheckHelper(rubric, code, line, index, isCompound):
+def evaluateBreakStatementsHelper(rubric, cursor, scopeStack):
     '''
-    Checks to see if the operator located at the given index is spaced
-    correctly, and if it is not adds an operator spacing error to the
-    style rubric
-    :type rubric: StyleRubric
-    :type code: str
-    :type line: int
-    :type index: int
-    :type isCompound: bool
-    '''
-    if not isSpacedCorrectly(code, index, isCompound):
-        spacingData = {
-            'operator': code[index:index + 2] if isCompound else code[index:index + 1]
-        }
-        rubric._addError('OPERATOR_SPACING', line + 1, index + 1, spacingData)
-
-def _evaluateBreakStatementsHelper(rubric, cursor, scopeStack):
-    '''
+    Reads the Clang syntax tree, checking for break statements outside of switch
+    statements. Scope stack is used to maintain which type of control context the
+    cursor is currently in (only tracks switch statements, or loop controls)
     :type rubric: StyleRubric
     :type cursor: clang.cindex.Cursor
-    :type scopeStack: list
+    :type scopeStack: list[str]
     '''
     if rubric._cursorNotInFile(cursor):
         return
@@ -45,13 +27,10 @@ def _evaluateBreakStatementsHelper(rubric, cursor, scopeStack):
             rubric._addError('UNNECESSARY_BREAK', cursor.location.line, cursor.location.column)
 
     for c in cursor.get_children():
-        _evaluateBreakStatementsHelper(rubric, c, scopeStack)
+        evaluateBreakStatementsHelper(rubric, c, scopeStack)
     if addedScope:
         scopeStack.pop()
 
-'''
-General helper functions
-'''
 def isOperator(cursor):
     '''
     Checks to see if the provided cursor is an operator cursor. Returns true if the
@@ -234,7 +213,7 @@ def checkOperatorOverload(rubric, cursor, code, index, lineNum, operatorLocation
                       '==', '!=', '<=', '>=', '&&', '||']
     if operator in binaryTwoSpace:
         operatorLocationDict[lineNum].add(index + 1)
-        rubric._operatorSpacingCheckHelper(code, lineNum, index, True)
+        rubric.checkOperatorSpacing(code, lineNum, index, True)
     elif operator in ['>>=', '<<=']:
         operatorLocationDict[lineNum].add(index + 1)
         operatorLocationDict[lineNum].add(index + 2)
