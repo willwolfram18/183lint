@@ -28,23 +28,35 @@ class StyleRubric(object):
     def resetRubric(self):
         # 'Global' state -- SHOULD NOT BE MODIFIED AFTER INIT
         self._clangIndex = Index.create()
+        ''':type : clang.cindex'''
         self._styleFunctions = self._loadStyleChecks()
+        ''':type : list[function]'''
 
         # Tracking for all files
         self._fileErrors = {}
+        ''':type : dict[str, list[StyleError]]'''
         self._errorTypes = {}
+        ''':type : dict[str, list[int]]'''
         self._totalErrors = 0
+        ''':type : int'''
 
         # Objects to maintain state of current file
         self._translationUnit = None
+        ''':type : clang.cindex.TranslationUnit'''
         self._clangCursor = None
+        ''':type : clang.cindex.Cursor'''
         self._currentFilename = None
+        ''':type : str'''
         self._cleanLines = None
 
         self._maxLineLength = int(self.config.get('SETTINGS', 'line_length'))
+        ''':type : int'''
         self._prohibitedLibs = self.config.get('SETTINGS', 'prohibited_libraries').split(',')
+        ''':type : list[str]'''
         self._foundLibs = []
+        ''':type : list[str]'''
         self._stdLib = False
+        ''':type : bool'''
 
     def _loadStyleChecks(self):
         return clangStyleFunctions.__dir__()

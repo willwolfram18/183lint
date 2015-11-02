@@ -1,8 +1,14 @@
+def _getErrorTypes():
+        return ['UNARY_OPERATOR_SPACING', 'OPERATOR_SPACING', 'GOTO', 'TERNARY_OPERATOR',
+                'LINE_LENGTH', 'COMPARISON_TO_BOOL', 'INFINITE_LOOP', 'UNNECESSARY_BREAK',
+                'EXIT', 'CONTINUE', 'BANNED_INCLUDE', 'USING_TABS']
+
 class StyleError(object):
     """
     Represents a style error in the student's code.
     """
-
+    ErrorTypes = _getErrorTypes()
+    ''':type : list[str]'''
     def __init__(self):
         self.lineNum = 0
         self.colNum = 0
