@@ -110,7 +110,7 @@ class StyleRubric(object):
         :type index: int
         :type isCompound: bool
         '''
-        if isSpacedCorrectly(code, index, isCompound):
+        if not isSpacedCorrectly(code, index, isCompound):
             indexOffset = 2 if isCompound else 1
             spacingData = {
                 'operator': code[index:index + indexOffset]
