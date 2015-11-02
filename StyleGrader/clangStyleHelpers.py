@@ -6,7 +6,7 @@ def evaluateBreakStatementsHelper(rubric, cursor, scopeStack):
     Reads the Clang syntax tree, checking for break statements outside of switch
     statements. Scope stack is used to maintain which type of control context the
     cursor is currently in (only tracks switch statements, or loop controls)
-    :type rubric: StyleRubric
+    :type rubric: StyleGrader.StyleRubric
     :type cursor: clang.cindex.Cursor
     :type scopeStack: list[str]
     '''
@@ -69,6 +69,22 @@ def isCompoundBinaryOperator(code, column):
     '''
     return code[column:column + 2] in ['!=', '==', '<=', '>=', '&&', '||', '->']
 
+def handleUnaryOperatorSpacing(rubric, code, lineNum, index):
+    '''
+
+    :type rubric: StyleGrader.StyleRubric
+    :type code: str
+    :type lineNum: int
+    :type index: int
+    '''
+    # Check for white space or ( in front, and no whitespace behind it
+    if (index - 1 >= 0 and code[index - 1] not in ['(', ' ', '\n', '\r']) or \
+        (index + 1 < len(code) and code[index] in [' ', '\n', '\r']):
+        spacingData = {
+            'operator': code[index:index+1]
+        }
+        rubric._addError('UNARY_OPERATOR_SPACING', lineNum + 1, index + 1, spacingData)
+
 def isSpacedCorrectly(code, index, isCompound):
     '''
     Checks to see if the operator has the appropriate white space characters preceding
@@ -86,20 +102,20 @@ def isSpacedCorrectly(code, index, isCompound):
     # Check spacing following operator
     elif index + postOffset < len(code) and code[index + postOffset] not in allowedSurroundingChars:
         return False
-    return  True
+    return True
 
-def _findStaticAndDynamixCastsHelper(rubric, cursor, cursors):
+def _findStaticAndDynamicCastsHelper(rubric, cursor, cursors):
     '''
     Looks through the Clang AST, placing any static or dynamic cast cursors into
     the cursors list
-    :type rubric: StyleRubric
+    :type rubric: StyleGrader.StyleRubric
     :type cursor: clang.cindex.Cursor
     :type cursors: list[clang.cindex.Cursor]
     '''
     if rubric._cursorNotInFile(cursor):
         return
     for c in cursor.get_children():
-        _findStaticAndDynamixCastsHelper(rubric, c, cursors)
+        _findStaticAndDynamicCastsHelper(rubric, c, cursors)
     if cursor.kind == CursorKind.CXX_CONST_CAST_EXPR or \
         cursor.kind == CursorKind.CXX_STATIC_CAST_EXPR or \
         cursor.kind == CursorKind.CXX_DYNAMIC_CAST_EXPR or \
@@ -112,11 +128,11 @@ def findStaticAndDynamicCasts(rubric, operatorLocationDict):
     if they follow the C++ style casts (e.g. static_cast<type_t>(operand)), and adds
     the angle brackets to the operatorLocationDict to prevent them being treated
     as operators
-    :type rubric: StyleRubric
+    :type rubric: StyleGrader.StyleRubric
     :type operatorLocationDict: dict[int, set[int]]
     '''
     castCursors = []
-    _findStaticAndDynamixCastsHelper(rubric, rubric._clangCursor, castCursors)
+    _findStaticAndDynamicCastsHelper(rubric, rubric._clangCursor, castCursors)
 
     for c in castCursors:
         # Clang does line and column indexing by 1
@@ -149,11 +165,13 @@ def cleanStringsAndChars(code):
     charPattern = re.compile("'.+?'", re.DOTALL)
     stringPattern = re.compile('".+?"', re.DOTALL)
 
-    # Store location of first erase, use later to see if
-    # column has shifted
+    # Store location of first erase, use later to see if column has shifted
     findIndex = None
+    # Remove escaped single and double quote characters
     firstReplace = code.find("\\'")
     code = code.replace("\\'", '')
+
+    # Iterate over all matched literal chars
     results = charPattern.findall(code)
     for match in results:
         findIndex = code.find(match)
@@ -161,6 +179,7 @@ def cleanStringsAndChars(code):
             firstReplace = findIndex
         code = code.replace(match, "''")
 
+    # Iterate over all matched literal strings
     findIndex = code.find('\\"')
     if firstReplace == -1 or\
         (findIndex != -1 and findIndex < firstReplace):
@@ -185,32 +204,43 @@ def lineBeginsWithSpaces(code):
     startsWithTab = re.compile('^\t+')
     return not startsWithTab.match(code) and startsWithSpace.match(code)
 
-def checkOperatorOverload(rubric, cursor, code, index, lineNum, operatorLocationDict):
+def checkOverloadedOperatorSpacing(rubric, cursor, code, index, lineNum, operatorLocationDict):
     '''
-
-    :type rubric: StyleRubric
+    Performs operator spacing evaluation on overloaded operators for a C++ class
+    :type rubric: StyleGrader.StyleRubric
     :type cursor: clang.cindex.Cursor
     :type code: string
     :type index: int
     :type lineNum: int
     :type operatorLocationDict: dict[int, set[int]]
-    :return:
     '''
-    unaryVal = [
-        re.compile('.+ \(\*\)\(\)'), # matches type_t (*)() member func
-        re.compile('.+ \(\*\)\(.\)') # matches type_t (*)(type_t) friend func
-    ]
-    binaryVal = [
-        re.compile('.+ \(\*\)\(.+\, .+\)'), # matches type_t (*)(type_x, type_y)
-    ]
-    ignoredOperators = ['++', '--', '->', '->*', '()', '[]']
+    # Sanity check that line number is in operator dict
+    if lineNum not in operatorLocationDict:
+        operatorLocationDict[lineNum] = set()
+    if index not in operatorLocationDict[lineNum]:
+        operatorLocationDict.add(index)
+
+    ignoredOperators = ['++', '--', '->', '->*', '()', '[]', ',']
     operator = cursor.displayname.replace('operator', '')
     if operator in ignoredOperators:
+        # Make sure to add operator locations for subsequent operator checks
+        if operator in ['++', '--', '->']:
+            operatorLocationDict[lineNum].add(index + 1)
+        elif operator == '->*':
+            operatorLocationDict[lineNum].add(index + 1)
+            operatorLocationDict[lineNum].add(index + 2)
         return
 
-    # Binary operators that take up two spaces
+    # Binary operators that have two characters
     binaryTwoSpace = ['+=', '-=', '*=', '/=', '%=', '^=', '&=', '|=', '>>', '<<',
                       '==', '!=', '<=', '>=', '&&', '||']
+    # Binary operators that have one character
+    binarySingleSpace = ['<', '>', '=', '/', '%', '&', '|']
+    # Guaranteed unary operators
+    unaryOperators = ['!', '~']
+    # Binary or unary operators
+    binaryOrUnary = ['+', '-', '*']
+
     if operator in binaryTwoSpace:
         operatorLocationDict[lineNum].add(index + 1)
         rubric.checkOperatorSpacing(code, lineNum, index, True)
@@ -223,3 +253,23 @@ def checkOperatorOverload(rubric, cursor, code, index, lineNum, operatorLocation
                 'operator': code[index:index+3]
             }
             rubric._addError('OPERATOR_SPACING', lineNum + 1, index + 1, spacingData)
+    elif operator in binarySingleSpace:
+        rubric.checkOperatorSpacing(code, lineNum, index, False)
+    elif operator in unaryOperators:
+       handleUnaryOperatorSpacing(rubric, code, lineNum, index)
+    elif operator in binaryOrUnary:
+        unaryExpressions = [
+            re.compile('.+ \(\*\)\(\)'), # matches type_t (*)() member func
+            re.compile('.+ \(\*\)\(.\)') # matches type_t (*)(type_t) friend func
+        ]
+        # Typical convention is binary expressions as friend functions with 2 parameters
+        # to the function
+        binaryExpression = re.compile('.+ \(\*\)\(.+\, .+\)'), # matches type_t (*)(type_x, type_y)
+        isUnary = False
+        for expr in unaryExpressions:
+            if expr.match(cursor.type.spelling):
+                handleUnaryOperatorSpacing(rubric, code, lineNum, index)
+                isUnary = True
+                break
+        if not isUnary and binaryExpression.match(code):
+            rubric.checkOperatorSpacing(code, lineNum, index, False)
