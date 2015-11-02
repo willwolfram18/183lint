@@ -259,17 +259,16 @@ def checkOverloadedOperatorSpacing(rubric, cursor, code, index, lineNum, operato
        handleUnaryOperatorSpacing(rubric, code, lineNum, index)
     elif operator in binaryOrUnary:
         unaryExpressions = [
-            re.compile('.+ \(\*\)\(\)'), # matches type_t (*)() member func
-            re.compile('.+ \(\*\)\(.\)') # matches type_t (*)(type_t) friend func
+            re.compile('.+ \(\*\)\(\)', re.DOTALL), # matches type_t (*)() member func
+            re.compile('.+ \(\*\)\(.+\)', re.DOTALL) # matches type_t (*)(type_t) friend func
         ]
         # Typical convention is binary expressions as friend functions with 2 parameters
         # to the function
-        binaryExpression = re.compile('.+ \(\*\)\(.+\, .+\)'), # matches type_t (*)(type_x, type_y)
-        isUnary = False
-        for expr in unaryExpressions:
-            if expr.match(cursor.type.spelling):
-                handleUnaryOperatorSpacing(rubric, code, lineNum, index)
-                isUnary = True
-                break
-        if not isUnary and binaryExpression.match(code):
+        binaryExpression = re.compile('.+ \(\*\)\(.+\, .+\)', re.DOTALL) # matches type_t (*)(type_x, type_y)
+        if binaryExpression.match(cursor.type.spelling):
             rubric.checkOperatorSpacing(code, lineNum, index, False)
+        else:
+            for expr in unaryExpressions:
+                if expr.match(cursor.type.spelling):
+                    handleUnaryOperatorSpacing(rubric, code, lineNum, index)
+                    break
