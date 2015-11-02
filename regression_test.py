@@ -1,119 +1,243 @@
+import os
 import unittest
-from StyleGrader import StyleRubric
+from StyleGrader import StyleError, StyleRubric
 
-def assertionMessage(expected, found, errorList=[]):
-    if expected == 0:
-        return 'Should be 0 errors total, found {}.'.format(found)
-    # Create a comma separated string
-    errorString = errorList[0]
-    if len(errorList) > 1:
-        for i in range(1, len(errorList) - 1):
-            errorString += ',' + errorList[i]
-        errorString += ', and ' + errorList[-1]
-    return 'Should be {} errors total ({}), found {}.'.format(expected, errorString, found)
+def assertionMessage(expected, found):
+    return 'Expected {} errors, found {}.'.format(expected, found)
+
+def errorTypeMessage(expected, errType, found):
+    return 'Expected {} {} errors, found {}.'.format(expected, errType, found)
+
+def checkTotalErrors(test, rubric, fileName, numExpected):
+    '''
+
+    :type test: RegressionTest
+    :type rubric: StyleRubric
+    :type numExpected: int
+    '''
+    errorDict = rubric.generateReport()
+    numFound = len(errorDict[fileName])
+    test.assertEqual(numFound, numExpected, assertionMessage(numExpected, numFound))
+
+def checkErrorTypes(test, errorDict, expectedErrorsDict, allowedErrorTypes):
+    '''
+
+    :type test: RegressionTest
+    :type errorDict: dict[str, int]
+    :type expectedErrorsDict: dict[str, int]
+    :type allowedErrorTypes: list[str]
+    '''
+    for errType in StyleError.ErrorTypes:
+        if errType in allowedErrorTypes:
+            errorsExpected = expectedErrorsDict[errType]
+
+            # Check that error type does exist in dictionary
+            test.assertTrue(errType in errorDict,
+                                      errorTypeMessage(errorsExpected, errType, 'none'))
+            errorsFound = errorDict[errType]
+            test.assertEqual(errorsFound, errorsExpected,
+                             errorTypeMessage(errorsExpected, errType, errorsFound))
+        else:
+            test.assertFalse(errType in errorDict, errorTypeMessage(0, errType, 'at least 1'))
 
 class RegressionTest(unittest.TestCase):
 
-    def testOperatorSpacing(self):
+    def test_BoolComp(self):
         rubric = StyleRubric()
+        expectedErrors = {
+            'total': 10,
+            'COMPARISON_TO_BOOL': 10,
+        }
+        allowedErrTypes = ['COMPARISON_TO_BOOL']
 
-        # TODO: Find way to grab test file paths via os.path
-        badTestName = 'test/operator_spacing_bad.cpp'
-        rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['OPERATOR_SPACING'], 35)
-        self.assertEqual(rubric._errorTypes['UNARY_OPERATOR_SPACING'], 1)
-        self.assertEqual(rubric._totalErrors, 38, assertionMessage(38, rubric._totalErrors, ['36 operator spacing', '2 == true']))
+        fileName = os.path.join('test', 'bool_comp.cpp')
+        self.assertTrue(os.path.exists(fileName), 'Test file "{}" does not exist.'.format(fileName))
 
-        rubric.resetRubric()
-        goodTestName = 'test/operator_spacing_good.cpp'
-        rubric.gradeFile(goodTestName)
-        self.assertEqual('OPERATOR_SPACING' not in rubric._errorTypes, True)
-        self.assertEqual('UNARY_OPERATOR_SPACING' not in rubric._errorTypes, True)
-        self.assertEqual(rubric._totalErrors, 2, assertionMessage(2, rubric._totalErrors, ['2 == true']))
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, 'bool_comp.cpp', expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
 
-
-    def testBreakStatements(self):
+    def test_OperatorSpacingBad(self):
         rubric = StyleRubric()
+        expectedErrors = {
+            'total': 38,
+            'OPERATOR_SPACING': 35,
+            'UNARY_OPERATOR_SPACING': 1,
+            'COMPARISON_TO_BOOL': 2
+        }
+        allowedErrTypes = ['OPERATOR_SPACING', 'UNARY_OPERATOR_SPACING', 'COMPARISON_TO_BOOL']
 
-        # TODO: Find file paths
-        badTestName = 'test/break_bad.cpp'
-        rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['UNNECESSARY_BREAK'], 3)
-        self.assertEqual(rubric._totalErrors, 5, assertionMessage(4, rubric._totalErrors, ['3 unnecessary breaks', '2 == true']))
+        fileName = os.path.join('test', 'operator_spacing_bad.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
 
-        rubric.resetRubric()
-        goodTestName = 'test/operator_spacing_good.cpp'
-        rubric.gradeFile(goodTestName)
-        self.assertEqual('UNNECESSARY_BREAK' not in rubric._errorTypes, True)
-        self.assertEqual(rubric._totalErrors, 2, assertionMessage(2, rubric._totalErrors, ['2 == true']))
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
 
-    def testContinueStatements(self):
+    def test_OperatorSpacingGood(self):
         rubric = StyleRubric()
+        expectedErrors = {
+            'total': 2,
+            'COMPARISON_TO_BOOL': 2
+        }
+        allowedErrTypes = ['COMPARISON_TO_BOOL']
 
-        # TODO: Find the file paths
-        badTestName = 'test/continue_bad.cpp'
-        rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['CONTINUE'], 3)
-        self.assertEqual(rubric._totalErrors, 4, assertionMessage(4, rubric._totalErrors, ['3 continues', '1 infinite loop']))
+        fileName = os.path.join('test', 'operator_spacing_good.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
 
-        rubric.resetRubric()
-        goodTestName = 'test/continue_good.cpp'
-        rubric.gradeFile(goodTestName)
-        self.assertEqual('CONTINUE' not in rubric._errorTypes, True)
-        self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
 
-    def testGotoStatements(self):
+    def test_OperatorSpacingOverload(self):
         rubric = StyleRubric()
+        expectedErrors = {
+            'total': 6,
+            'OPERATOR_SPACING': 5,
+            'UNARY_OPERATOR_SPACING': 1,
+        }
+        allowedErrTypes = ['OPERATOR_SPACING', 'UNARY_OPERATOR_SPACING']
 
-        # TODO: Find the file paths
-        badTestName = 'test/goto_bad.cpp'
-        rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['GOTO'], 1)
-        self.assertEqual(rubric._totalErrors, 1, assertionMessage(1, rubric._totalErrors, ['1 continue']))
+        fileName = os.path.join('test', 'operator_overload_myint.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
 
-        rubric.resetRubric()
-        goodTestName = 'test/goto_good.cpp'
-        rubric.gradeFile(goodTestName)
-        self.assertEqual('GOTO' not in rubric._errorTypes, True)
-        self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
 
-    def testInfiniteLoop(self):
+    def test_BreakStatements(self):
         rubric = StyleRubric()
+        expectedErrors = {
+            'total': 5,
+            'UNNECESSARY_BREAK': 3,
+            'INFINITE_LOOP': 2,
+        }
+        allowedErrTypes = ['UNNECESSARY_BREAK', 'INFINITE_LOOP']
 
-        # TODO: Find the file paths
-        badTestName = 'test/while_true_bad.cpp'
-        rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['INFINITE_LOOP'], 6)
-        self.assertEqual(rubric._totalErrors, 6, assertionMessage(6, rubric._totalErrors, ['6 infinite loops']))
+        fileName = os.path.join('test', 'break_bad.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
 
-        goodTestName = 'test/while_true_good.cpp'
-        rubric.resetRubric()
-        rubric.gradeFile(goodTestName)
-        self.assertEqual('INFINITE_LOOP' not in rubric._errorTypes, True)
-        self.assertEqual(rubric._totalErrors, 0, assertionMessage(0, rubric._totalErrors))
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
 
-    def testBoolComparison(self):
+    def test_ContinueBad(self):
         rubric = StyleRubric()
+        expectedErrors = {
+            'total': 4,
+            'CONTINUE': 3,
+            'INFINITE_LOOP': 1,
+        }
+        allowedErrTypes = ['CONTINUE', 'INFINITE_LOOP']
 
-        badTestName = 'test/bool_comp.cpp'
-        rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['COMPARISON_TO_BOOL'], 10)
-        self.assertEqual(rubric._totalErrors, 10, assertionMessage(10, rubric._totalErrors, ['10 while(true) loops']))
+        fileName = os.path.join('test', 'continue_bad.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
 
-    def testLineLength(self):
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
+
+    def test_ContinueGood(self):
         rubric = StyleRubric()
+        expectedErrors = {
+            'total': 0,
+        }
+        allowedErrTypes = []
 
-        # TODO: Find file path
-        badTestName = 'test/line_length.cpp'
-        rubric.gradeFile(badTestName)
-        self.assertEqual(rubric._errorTypes['LINE_LENGTH'], 2)
-        self.assertEqual(rubric._totalErrors, 2, assertionMessage(2, rubric._totalErrors, ['2 line length']))
+        fileName = os.path.join('test', 'continue_good.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
 
-        rubric.resetRubric()
-        goodTestName = 'test/operator_spacing_good.cpp'
-        rubric.gradeFile(goodTestName)
-        self.assertEqual('LINE_LENGTH' not in rubric._errorTypes, True)
-        self.assertEqual(rubric._totalErrors, 2, assertionMessage(2, rubric._totalErrors, ['2 == true']))
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
+
+    def test_GotoBad(self):
+        rubric = StyleRubric()
+        expectedErrors = {
+            'total': 1,
+            'GOTO': 1,
+        }
+        allowedErrTypes = ['GOTO']
+
+        fileName = os.path.join('test', 'goto_bad.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
+
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
+
+    def test_GotoGood(self):
+        rubric = StyleRubric()
+        expectedErrors = {
+            'total': 0
+        }
+        allowedErrTypes = []
+
+        fileName = os.path.join('test', 'goto_good.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
+
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
+
+    def test_InfiniteLoopBad(self):
+        rubric = StyleRubric()
+        expectedErrors = {
+            'total': 6,
+            'INFINITE_LOOP': 6
+        }
+        allowedErrTypes = ['INFINITE_LOOP']
+
+        fileName = os.path.join('test', 'while_true_bad.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
+
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
+
+    def test_InfiniteLoopGood(self):
+        rubric = StyleRubric()
+        expectedErrors = {
+            'total': 0
+        }
+        allowedErrTypes = []
+
+        fileName = os.path.join('test', 'while_true_good.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
+
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
+
+    def test_LineLength(self):
+        rubric = StyleRubric()
+        expectedErrors = {
+            'total': 2,
+            'LINE_LENGTH': 2
+        }
+        allowedErrTypes = ['LINE_LENGTH']
+
+        fileName = os.path.join('test', 'line_length.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
+
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
+
+    def test_Indentation(self):
+        rubric = StyleRubric()
+        expectedErrors = {
+            'total': 1,
+            'USING_TABS': 1
+        }
+        allowedErrTypes = ['USING_TABS']
+
+        fileName = os.path.join('test', 'tab_indents.cpp')
+        self.assertTrue(os.path.exists(fileName), 'File "{}" does not exist.'.format(fileName))
+
+        rubric.gradeFile(fileName)
+        checkTotalErrors(self, rubric, os.path.split(fileName)[1], expectedErrors['total'])
+        checkErrorTypes(self, rubric._errorTypes, expectedErrors, allowedErrTypes)
 
 if __name__ == '__main__':
     unittest.main()
